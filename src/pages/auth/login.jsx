@@ -204,9 +204,9 @@ const LoginForm = ({ onToggle, onForgotPassword }) => {
               disabled={isAnyLoading}
               className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700 rounded disabled:opacity-50"
             />
-            <label htmlFor="remember-me" className={`ml-2 block text-sm text-gray-300 ${isAnyLoading ? 'opacity-50' : ''}`}>
+            {/* <label htmlFor="remember-me" className={`ml-2 block text-sm text-gray-300 ${isAnyLoading ? 'opacity-50' : ''}`}>
               Remember me
-            </label>
+            </label> */}
           </div>
           <button
             type="button"
@@ -229,7 +229,7 @@ const LoginForm = ({ onToggle, onForgotPassword }) => {
       </div>
 
       {/* Google Login Button with separate loading state */}
-      <div className="flex flex-col items-center space-y-2">
+      {/* <div className="flex flex-col items-center space-y-2">
         <div className="w-full flex items-center">
           <div className="flex-grow border-t border-gray-700"></div>
           <span className="mx-3 text-gray-400 text-sm">or</span>
@@ -254,9 +254,9 @@ const LoginForm = ({ onToggle, onForgotPassword }) => {
             </div>
           )}
         </div>
-      </div>
+      </div> */}
       
-      <div className="text-center">
+      {/* <div className="text-center">
         <span className={`text-gray-400 ${isAnyLoading ? 'opacity-50' : ''}`}>Don't have an account? </span>
         <button
           onClick={onToggle}
@@ -265,7 +265,7 @@ const LoginForm = ({ onToggle, onForgotPassword }) => {
         >
           Sign Up
         </button>
-      </div>
+      </div> */}
     </form>
   );
 };
