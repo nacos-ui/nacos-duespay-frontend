@@ -1,33 +1,20 @@
 import SETTINGS from '../settings';
 
-const RESERVED_SUBDOMAINS = ['www', ''];
+// Reserved paths that should not be treated as association shortnames
+const RESERVED_PATHS = [
+  'www',
+  'dashboard',
+  'auth',
+  'settings',
+  'create-association',
+  'transactions',
+  'payment',
+  'reset-password',
+];
 
 export function extractShortName({ pathShortName = null } = {}) {
-  const host = window.location.hostname;
-  const parts = host.split('.');
-
-  // localhost: shortname.localhost
-  if (
-    SETTINGS.BASE_DOMAIN === 'localhost' &&
-    parts.length === 2 &&
-    parts[1] === 'localhost' &&
-    !RESERVED_SUBDOMAINS.includes(parts[0])
-  ) {
-    return parts[0];
-  }
-
-  // production: shortname.duespay.app
-  if (
-    SETTINGS.BASE_DOMAIN === 'duespay.app' &&
-    parts.length === 3 &&
-    parts[1] + '.' + parts[2] === 'duespay.app' &&
-    !RESERVED_SUBDOMAINS.includes(parts[0])
-  ) {
-    return parts[0];
-  }
-
-  // fallback to path param (for /shortname)
-  if (pathShortName && !RESERVED_SUBDOMAINS.includes(pathShortName)) {
+  // Only use path-based shortname
+  if (pathShortName && !RESERVED_PATHS.includes(pathShortName)) {
     return pathShortName;
   }
 

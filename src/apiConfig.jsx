@@ -1,7 +1,5 @@
 // export const API_BASE_URL = "http://localhost:8000";
-// export const API_BASE_URL = "https://duespay-backend.fly.dev";
-export const API_BASE_URL = "https://duespay.onrender.com";
-// export const API_BASE_URL = "https://duespay.pythonanywhere.com";
+export const API_BASE_URL = "https://duespay-backend.onrender.com";
 
 export const API_ENDPOINTS = {
   // Auth endpoints
@@ -28,6 +26,8 @@ export const API_ENDPOINTS = {
   UPDATE_ASSOCIATION: (id) => `${API_BASE_URL}/api/association/profiles/${id}/`,
   GET_ASSOCIATION: `${API_BASE_URL}/api/association/profiles/`,
   GET_PAYMENT_ASSOCIATION: (shortName) => `${API_BASE_URL}/api/association/get-association/${shortName?.toLowerCase()}/`,
+  // New endpoint for getting the single association without shortname
+  GET_SINGLE_ASSOCIATION: `${API_BASE_URL}/api/association/get-association/`,
   GET_PROFILE: `${API_BASE_URL}/api/association/get-profile/`,
 
   // Notifications endpoints

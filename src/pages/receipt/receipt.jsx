@@ -17,6 +17,9 @@ const ReceiptPage = () => {
   const receiptRef = useRef();
 
   const numberToWords = (num) => {
+    // Convert only whole numbers, ignore decimals
+    const wholeNum = Math.floor(num);
+
     const ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
     const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
     const teens = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
@@ -40,12 +43,12 @@ const ReceiptPage = () => {
       return result;
     };
 
-    if (num === 0) return "zero";
+    if (wholeNum === 0) return "zero";
     let result = "";
-    let billion = Math.floor(num / 2000000000);
-    let million = Math.floor((num % 2000000000) / 2000000);
-    let thousand = Math.floor((num % 2000000) / 1000);
-    let remainder = num % 1000;
+    let billion = Math.floor(wholeNum / 1000000000);
+    let million = Math.floor((wholeNum % 1000000000) / 1000000);
+    let thousand = Math.floor((wholeNum % 1000000) / 1000);
+    let remainder = wholeNum % 1000;
 
     if (billion > 0) result += convertHundreds(billion) + "billion ";
     if (million > 0) result += convertHundreds(million) + "million ";
@@ -116,7 +119,18 @@ const ReceiptPage = () => {
 
   const themeColor = receipt.association_theme_color || "#0066CC";
   const logo = receipt.association_logo;
-  const amountInWords = numberToWords(Number(receipt.amount_paid));
+
+  // Calculate amount in words with kobo handling
+  const amount = Number(receipt.amount_paid);
+  const naira = Math.floor(amount);
+  const kobo = Math.round((amount - naira) * 100);
+
+  let amountInWords = numberToWords(naira);
+  if (kobo > 0) {
+    amountInWords += ` naira, ${numberToWords(kobo)} kobo`;
+  } else {
+    amountInWords += " naira only";
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8 px-2 sm:px-4">
@@ -147,8 +161,8 @@ const ReceiptPage = () => {
           }}
         >
           {/* Header Section */}
-          <div 
-            style={{ 
+          <div
+            style={{
               background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}dd 100%)`,
               color: "white",
               padding: "16px 24px",
@@ -180,9 +194,9 @@ const ReceiptPage = () => {
                 />
               )}
               <div>
-                <div style={{ 
-                  fontWeight: "700", 
-                  fontSize: "16px", 
+                <div style={{
+                  fontWeight: "700",
+                  fontSize: "16px",
                   letterSpacing: "0.5px",
                   marginBottom: "2px",
                   wordWrap: "break-word",
@@ -192,19 +206,19 @@ const ReceiptPage = () => {
                 }}>
                   {receipt.association_name}
                 </div>
-                <div style={{ 
-                  fontSize: "11px", 
+                <div style={{
+                  fontSize: "11px",
                   opacity: "0.9",
-                  letterSpacing: "1px" 
+                  letterSpacing: "1px"
                 }}>
                   {receipt.association_short_name?.toUpperCase()}
                 </div>
               </div>
             </div>
-            
+
             <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ 
-                fontWeight: "700", 
+              <div style={{
+                fontWeight: "700",
                 fontSize: "16px",
                 marginBottom: "4px",
                 letterSpacing: "1px"
@@ -215,13 +229,13 @@ const ReceiptPage = () => {
           </div>
 
           {/* Main Content Area */}
-          <div style={{ 
-            flex: 1, 
-            padding: "20px 24px", 
+          <div style={{
+            flex: 1,
+            padding: "20px 24px",
             position: "relative",
             background: "#ffffff"
           }}>
-            
+
             {/* Watermark */}
             {logo && (
               <div style={{
@@ -310,7 +324,7 @@ const ReceiptPage = () => {
             </div>
 
             {/* Content Layout (bordered box, does NOT include receipt no/date) */}
-            <div style={{ 
+            <div style={{
               display: "flex",
               flexDirection: "column",
               gap: "16px",
@@ -324,15 +338,15 @@ const ReceiptPage = () => {
             }}>
               {/* Session Title */}
               {receipt.session_title && (
-                <div style={{ 
+                <div style={{
                   display: "flex",
                   flexDirection: "row",
                   alignItems: "center",
                   flexWrap: "wrap"
                 }}>
-                  <div style={{ 
-                    fontSize: "11px", 
-                    fontWeight: "600", 
+                  <div style={{
+                    fontSize: "11px",
+                    fontWeight: "600",
                     color: "#6b7280",
                     textTransform: "uppercase",
                     letterSpacing: "0.5px",
@@ -342,8 +356,8 @@ const ReceiptPage = () => {
                   }}>
                     SESSION:
                   </div>
-                  <div style={{ 
-                    fontSize: "15px", 
+                  <div style={{
+                    fontSize: "15px",
                     fontWeight: "700",
                     color: "#374151",
                     lineHeight: "1.4",
@@ -359,15 +373,15 @@ const ReceiptPage = () => {
               )}
 
               {/* Payment From */}
-              <div style={{ 
+              <div style={{
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
                 flexWrap: "wrap"
               }}>
-                <div style={{ 
-                  fontSize: "11px", 
-                  fontWeight: "600", 
+                <div style={{
+                  fontSize: "11px",
+                  fontWeight: "600",
                   color: "#6b7280",
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
@@ -377,9 +391,9 @@ const ReceiptPage = () => {
                 }}>
                   PAYMENT FROM:
                 </div>
-                <div style={{ 
-                  fontSize: "15px", 
-                  fontWeight: "700", 
+                <div style={{
+                  fontSize: "15px",
+                  fontWeight: "700",
                   color: "#111827",
                   flex: "1",
                   minWidth: "200px",
@@ -392,15 +406,15 @@ const ReceiptPage = () => {
               </div>
 
               {/* level */}
-              <div style={{ 
+              <div style={{
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
                 flexWrap: "wrap"
               }}>
-                <div style={{ 
-                  fontSize: "11px", 
-                  fontWeight: "600", 
+                <div style={{
+                  fontSize: "11px",
+                  fontWeight: "600",
                   color: "#6b7280",
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
@@ -410,9 +424,9 @@ const ReceiptPage = () => {
                 }}>
                   LEVEL:
                 </div>
-                <div style={{ 
-                  fontSize: "15px", 
-                  fontWeight: "700", 
+                <div style={{
+                  fontSize: "15px",
+                  fontWeight: "700",
                   color: "#111827",
                   flex: "1",
                   minWidth: "200px",
@@ -425,15 +439,15 @@ const ReceiptPage = () => {
               </div>
 
               {/* Items Paid */}
-              <div style={{ 
+              <div style={{
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
                 flexWrap: "wrap"
               }}>
-                <div style={{ 
-                  fontSize: "11px", 
-                  fontWeight: "600", 
+                <div style={{
+                  fontSize: "11px",
+                  fontWeight: "600",
                   color: "#6b7280",
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
@@ -443,8 +457,8 @@ const ReceiptPage = () => {
                 }}>
                   ITEMS PAID:
                 </div>
-                <div style={{ 
-                  fontSize: "15px", 
+                <div style={{
+                  fontSize: "15px",
                   fontWeight: "700",
                   color: "#374151",
                   lineHeight: "1.4",
@@ -458,15 +472,15 @@ const ReceiptPage = () => {
                 </div>
               </div>
               {/* Amount in words */}
-              <div style={{ 
+              <div style={{
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
                 flexWrap: "wrap"
               }}>
-                <div style={{ 
-                  fontSize: "11px", 
-                  fontWeight: "600", 
+                <div style={{
+                  fontSize: "11px",
+                  fontWeight: "600",
                   color: "#6b7280",
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
@@ -477,28 +491,29 @@ const ReceiptPage = () => {
                   AMOUNT IN WORDS:
                 </div>
                 <div style={{ flex: "1", minWidth: "200px", marginLeft: "0" }}>
-                  <div style={{ 
-                    fontSize: "15px", 
-                    fontWeight: "700", 
+                  <div style={{
+                    fontSize: "15px",
+                    fontWeight: "700",
                     color: "#374151",
                     fontFamily: "'Inter', sans-serif",
-                    marginBottom: "4px"
+                    marginBottom: "4px",
+                    textTransform: "capitalize"
                   }}>
-                    {amountInWords} naira only
+                    {amountInWords}
                   </div>
                 </div>
-              </div>    
+              </div>
 
               {/* Amount */}
-              <div style={{ 
+              <div style={{
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
                 flexWrap: "wrap"
               }}>
-                <div style={{ 
-                  fontSize: "11px", 
-                  fontWeight: "600", 
+                <div style={{
+                  fontSize: "11px",
+                  fontWeight: "600",
                   color: "#6b7280",
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
@@ -509,9 +524,9 @@ const ReceiptPage = () => {
                   AMOUNT:
                 </div>
                 <div style={{ flex: "1", minWidth: "200px", marginLeft: "0" }}>
-                  <div style={{ 
-                    fontSize: "20px", 
-                    fontWeight: "700", 
+                  <div style={{
+                    fontSize: "20px",
+                    fontWeight: "700",
                     color: themeColor,
                     fontFamily: "'Inter', sans-serif",
                     marginBottom: "4px"
@@ -519,7 +534,7 @@ const ReceiptPage = () => {
                     ₦{Number(receipt.amount_paid).toLocaleString()}
                   </div>
                 </div>
-              </div>          
+              </div>
             </div>
 
             {/* Signature Section */}
@@ -529,15 +544,15 @@ const ReceiptPage = () => {
               right: "24px",
               textAlign: "right"
             }}>
-              <div style={{ 
-                width: "120px", 
-                height: "1px", 
+              <div style={{
+                width: "120px",
+                height: "1px",
                 background: "#d1d5db",
                 marginBottom: "6px",
                 marginLeft: "auto"
               }}></div>
-              <div style={{ 
-                fontSize: "9px", 
+              <div style={{
+                fontSize: "9px",
                 color: "#9ca3af",
                 textTransform: "uppercase",
                 letterSpacing: "0.5px"
@@ -579,7 +594,7 @@ const ReceiptPage = () => {
                   <svg width="18" height="18" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="#fff">
                     <g fill="none" fillRule="evenodd">
                       <g transform="translate(1 1)" strokeWidth="3">
-                        <circle strokeOpacity=".3" cx="18" cy="18" r="18"/>
+                        <circle strokeOpacity=".3" cx="18" cy="18" r="18" />
                         <path d="M36 18c0-9.94-8.06-18-18-18">
                           <animateTransform
                             attributeName="transform"
@@ -587,7 +602,7 @@ const ReceiptPage = () => {
                             from="0 18 18"
                             to="360 18 18"
                             dur="1s"
-                            repeatCount="indefinite"/>
+                            repeatCount="indefinite" />
                         </path>
                       </g>
                     </g>

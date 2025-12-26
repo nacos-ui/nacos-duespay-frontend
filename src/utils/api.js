@@ -19,12 +19,14 @@ const axiosInstance = axios.create({
 // 🔥 ROUTES THAT DON'T NEED TOKEN REFRESH
 const PUBLIC_ROUTES = [
   '/auth/login/',
-  '/auth/register/', 
+  '/auth/register/',
   '/auth/google/',
   '/auth/password/reset/',
   '/auth/password/reset/confirm/',
   '/transactions/receipt/', // This will match any receipt_id
-  // '/', 
+  '/association/get-association/', // Public association endpoint for /pay
+  '/payers/check/', // Payer registration endpoint
+  '/transactions/payment/', // Payment initiation and status endpoints
 ];
 
 const isPublicRoute = (url) => {
@@ -34,7 +36,7 @@ const isPublicRoute = (url) => {
 // Request interceptor to add token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access_token'); 
+    const token = localStorage.getItem('access_token');
     if (token && !isPublicRoute(config.url)) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -111,7 +113,7 @@ const api = async (url, options = {}) => {
     }
 
     const response = await axiosInstance(config);
-    
+
     // Make it behave like fetch
     return {
       ok: response.status >= 200 && response.status < 300,

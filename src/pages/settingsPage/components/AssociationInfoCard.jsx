@@ -13,12 +13,12 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
 
   const initialForm = assoc
     ? {
-        id: assoc.id,
-        association_name: assoc.association_name || "",
-        association_short_name: assoc.association_short_name || "",
-        association_type: assoc.association_type || "",
-        theme_color: assoc.theme_color || "#9810fa",
-      }
+      id: assoc.id,
+      association_name: assoc.association_name || "",
+      association_short_name: assoc.association_short_name || "",
+      association_type: assoc.association_type || "",
+      theme_color: assoc.theme_color || "#9810fa",
+    }
     : {};
 
   const [edit, setEdit] = useState(false);
@@ -38,7 +38,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
       const timer = setTimeout(() => {
         setMessage({ type: '', text: '' });
       }, 5000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [message.text]);
@@ -46,19 +46,19 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
   const handleLogoChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      
+
       // Validate file type
       if (!file.type.startsWith('image/')) {
         setMessage({ type: 'error', text: 'Please select a valid image file.' });
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         setMessage({ type: 'error', text: 'File size must be less than 5MB.' });
         return;
       }
-      
+
       setLogoFile(file);
       setMessage({ type: '', text: '' }); // Clear any previous errors
     }
@@ -67,20 +67,20 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
   const handleSave = async () => {
     setSaving(true);
     setMessage({ type: '', text: '' });
-    
+
     // Validate required fields
     if (!form.association_name.trim()) {
       setMessage({ type: 'error', text: 'Association name is required.' });
       setSaving(false);
       return;
     }
-    
+
     if (!form.association_short_name.trim()) {
       setMessage({ type: 'error', text: 'Short name is required.' });
       setSaving(false);
       return;
     }
-    
+
     if (!form.association_type) {
       setMessage({ type: 'error', text: 'Association type is required.' });
       setSaving(false);
@@ -107,7 +107,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
 
         requestOptions = {
           method,
-          headers: { 
+          headers: {
             Authorization: `Bearer ${token}`
             // Don't set Content-Type for FormData
           },
@@ -116,7 +116,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
 
         // Use native fetch for FormData uploads
         const res = await fetchWithTimeout(url, requestOptions);
-        
+
         const responseData = await res.json();
         if (res.ok) {
           const updated = responseData.data;
@@ -125,16 +125,16 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
           setEdit(false);
           setLogoFile(null);
           onUpdated({ results: [updated] });
-          
+
           // 🔥 ADD THIS LINE - Trigger context refresh
           await triggerContextRefresh();
-          
+
         } else {
           const error = await res.json();
           console.error('API Error:', error);
-          setMessage({ 
-            type: 'error', 
-            text: error.message || error.detail || 'Failed to update association info.' 
+          setMessage({
+            type: 'error',
+            text: error.message || error.detail || 'Failed to update association info.'
           });
         }
       } else {
@@ -166,9 +166,9 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
         } else {
           const error = await res.json();
           console.error('API Error:', error);
-          setMessage({ 
-            type: 'error', 
-            text: error.message || error.detail || 'Failed to update association info.' 
+          setMessage({
+            type: 'error',
+            text: error.message || error.detail || 'Failed to update association info.'
           });
         }
       }
@@ -182,12 +182,11 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
   };
 
   const handleCopyLink = async () => {
+    const link = `${window.location.origin}/pay`;
     try {
-      const link = `https://${assoc.association_short_name}.${domain}`;
       await navigator.clipboard.writeText(link);
-      setMessage({ type: 'success', text: 'Payment link copied!' });
+      setMessage({ type: 'success', text: 'Payment link copied to clipboard!' });
     } catch (err) {
-      console.error('Failed to copy link:', err);
       setMessage({ type: 'error', text: 'Failed to copy link' });
     }
   };
@@ -209,7 +208,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
           Association Info
         </h2>
         {!edit && (
-          <button 
+          <button
             className="text-purple-400 hover:text-purple-300 transition-colors"
             onClick={() => setEdit(true)}
           >
@@ -217,7 +216,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
           </button>
         )}
       </div>
-      
+
       {message.text && (
         <StatusMessage type={message.type}>
           {message.text}
@@ -244,7 +243,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
               />
             </div>
           </div>
-          
+
           <div>
             <label className="text-gray-400 text-sm">Theme Color</label>
             <div className="flex items-center gap-3 mt-1">
@@ -257,7 +256,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <div 
+                <div
                   className="w-12 h-12 rounded border border-gray-600 shadow-lg"
                   style={{ backgroundColor: form.theme_color || "#9810fa" }}
                 ></div>
@@ -271,7 +270,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
               </div>
             </div>
           </div>
-          
+
           <div>
             <label className="text-gray-400 text-sm">Association Name</label>
             <input
@@ -281,7 +280,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
               placeholder="Enter association name"
             />
           </div>
-          
+
           <div>
             <label className="text-gray-400 text-sm">Short Name</label>
             <input
@@ -291,7 +290,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
               placeholder="Enter short name"
             />
           </div>
-          
+
           <div>
             <label className="text-gray-400 text-sm">Association Type</label>
             <select
@@ -306,7 +305,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
               <option value="other">Other</option>
             </select>
           </div>
-          
+
           <div className="flex gap-2 mt-4">
             <button
               className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors disabled:opacity-50"
@@ -343,45 +342,45 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
               <span className="ml-2 text-white">—</span>
             )}
           </div>
-          
+
           <div className="flex items-center">
             <span className="text-gray-400 text-sm w-24">Theme Color:</span>
             <div className="flex items-center gap-2 ml-2">
-              <div 
+              <div
                 className="w-6 h-6 rounded border border-gray-600"
                 style={{ backgroundColor: assoc?.theme_color || '#9810fa' }}
               ></div>
               <span className="text-white">{assoc?.theme_color || '#9810fa'}</span>
             </div>
           </div>
-          
+
           <div className="flex items-center">
             <span className="text-gray-400 text-sm w-24">Association:</span>
             <span className="ml-2 text-white">{assoc?.association_name || "—"}</span>
           </div>
-          
+
           <div className="flex items-center">
             <span className="text-gray-400 text-sm w-24">Short Name:</span>
             <span className="ml-2 text-white">{assoc?.association_short_name || "—"}</span>
           </div>
-          
+
           <div className="flex items-center">
             <span className="text-gray-400 text-sm w-24">Type:</span>
             <span className="ml-2 text-white">{assoc?.association_type || "—"}</span>
           </div>
-          
+
           <div className="flex items-center">
             <span className="text-gray-400 text-sm w-24">Payment Link:</span>
             <div className="ml-2 flex items-center gap-2 flex-1">
               {assoc?.association_short_name ? (
                 <>
                   <a
-                    href={`https://${assoc.association_short_name}.${domain}`}
+                    href={`${window.location.origin}/pay`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-purple-400 hover:text-purple-300 break-all text-sm"
                   >
-                    {`https://${assoc.association_short_name}.${domain}`}
+                    {`${window.location.origin}/pay`}
                   </a>
                   <button
                     className="text-gray-400 hover:text-purple-400 transition-colors p-1"

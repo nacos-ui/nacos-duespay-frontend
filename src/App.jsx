@@ -14,7 +14,6 @@ import ErrorBoundaryWithModal from './components/ErrorBoundaryWithModal';
 import { SessionProvider } from './contexts/SessionContext';
 import PasswordResetConfirm from './pages/auth/passwordResetConfirm';
 import NotFoundPage from './pages/404_page';
-import { extractShortName } from './utils/getShortname';
 import ReceiptPage from './pages/receipt/receipt';
 import { ErrorProvider } from './contexts/ErrorContext';
 import PaymentCallback from './pages/payment/PaymentCallback';
@@ -22,12 +21,6 @@ import { useGlobalError } from './contexts/ErrorContext';
 import { setGlobalErrorSetter } from './utils/api';
 
 function App() {
-  const pathname = window.location.pathname;
-  const pathParts = pathname.split('/').filter(Boolean);
-  const pathShortName = pathParts[0] || null;
-  const host = window.location.hostname;
-  const hostParts = host.split('.');
-
   function GlobalErrorSetter() {
     const { setModalError } = useGlobalError();
     React.useEffect(() => {
@@ -36,31 +29,6 @@ function App() {
     return null;
   }
 
-  // Get shortname from subdomain or path
-  const subdomainShortName =
-    (hostParts.length === 2 && hostParts[1] === 'localhost') ||
-    (hostParts.length === 3 && hostParts[1] + '.' + hostParts[2] === 'duespay.app')
-      ? hostParts[0]
-      : null;
-
-  const shortName = extractShortName({ pathShortName });
-
-  // If subdomain is www or empty, treat as home (not a payment flow)
-  if (subdomainShortName === 'www' || subdomainShortName === '') {
-    // Continue to normal routing (not payment flow)
-  } else if (subdomainShortName && pathParts.length > 0) {
-    // If both subdomain and path are present (except www), show 404
-    return <NotFoundPage message="Requested URL not found on this server." />;
-  } else if (subdomainShortName) {
-    // Only subdomain present, show payment flow
-    return (
-      <ErrorBoundaryWithModal>
-        <DuesPayPaymentFlow shortName={shortName} />
-      </ErrorBoundaryWithModal>
-    );
-  }
-
-  // Otherwise, use router for normal routes
   return (
     <ErrorBoundaryWithModal>
       <ErrorProvider>
@@ -68,12 +36,12 @@ function App() {
         <SessionProvider>
           <Router>
             <Routes>
-              <Route path='/' element={<Navigate to="/dashboard/overview" replace />} />
+              {/* Home route now redirects to /pay */}
+              <Route path='/' element={<Navigate to="/pay" replace />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<PasswordResetConfirm />} />
               <Route path="/transactions/receipt/:receipt_id" element={<ReceiptPage />} />
-              <Route path="/:shortName" element={<DuesPayPaymentFlow />} />
-              
+
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard/overview" element={<Overview />} />
                 <Route path="/dashboard/payment-items" element={<PaymentItems />} />
@@ -83,9 +51,12 @@ function App() {
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/dashboard/sessions/new" element={<CreateSessionPage />} />
               </Route>
-              
+
               <Route path="/payment/callback" element={<PaymentCallback />} />
-              
+
+              {/* Static /pay route replaces dynamic /:shortName route */}
+              <Route path="/pay" element={<DuesPayPaymentFlow />} />
+
               {/* Catch-all 404 for unregistered routes */}
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

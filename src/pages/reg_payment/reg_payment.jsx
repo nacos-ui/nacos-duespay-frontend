@@ -16,20 +16,19 @@ import { usePageBranding } from "../../hooks/usePageBranding";
 import { isColorDark } from "./utils/colorUtils";
 import { pickId, generateThemeStyles, sanitizeName } from "./utils/themeUtils";
 import NotFoundPage from '../404_page';
-import { extractShortName } from '../../utils/getShortname';
 
 // Add this function before the component definition
 const filterAndProcessPaymentItems = (paymentItems, payerLevel) => {
   if (!paymentItems || !payerLevel) return paymentItems || [];
-  
+
   return paymentItems
     .filter(item => item.is_active) // Only show active items
     .map(item => {
       // Check if this item is compulsory for the payer's level
-      const isCompulsoryForPayer = item.status === 'compulsory' && 
-        item.compulsory_for && 
+      const isCompulsoryForPayer = item.status === 'compulsory' &&
+        item.compulsory_for &&
         (item.compulsory_for.includes(payerLevel) || item.compulsory_for.includes('All Levels'));
-      
+
       return {
         ...item,
         // Override status based on payer's level
@@ -38,10 +37,8 @@ const filterAndProcessPaymentItems = (paymentItems, payerLevel) => {
     });
 };
 
-const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
-  const { shortName: pathShortName } = useParams();
-  const shortName = propShortName || extractShortName({ pathShortName });
-  
+const DuesPayPaymentFlow = () => {
+
   // Get URL search params
   const urlParams = new URLSearchParams(window.location.search);
   const paymentReference = urlParams.get('reference');
@@ -75,7 +72,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
   const [payLoading, setPayLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const [paymentStatusData, setPaymentStatusData] = useState(null);
-  
+
   // 🔥 NEW: Virtual account data
   const [virtualAccountData, setVirtualAccountData] = useState(null);
   const [pollingInterval, setPollingInterval] = useState(null);
@@ -85,48 +82,47 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
 
   // Dynamic page branding with favicon
   usePageBranding({
-    title: currentStep === 1 ? "Registration" : 
-           currentStep === 2 ? "Payment Selection" : 
-           currentStep === 3 ? "Payment Process" :
-           "Payment Status",
+    title: currentStep === 1 ? "Registration" :
+      currentStep === 2 ? "Payment Selection" :
+        currentStep === 3 ? "Payment Process" :
+          "Payment Status",
     faviconUrl: associationData?.logo_url,
     associationName: associationData?.association_name
   });
 
-  // ... existing useEffect for fetchAssociation remains the same ...
-
+  // Fetch the single association (no shortname needed)
   useEffect(() => {
     const fetchAssociation = async () => {
-      console.log("📡 Starting fetch for:", shortName);
-      
+      console.log("📡 Starting fetch for single association");
+
       setLoadError(null);
-      
+
       try {
         const res = await fetchWithTimeout(
-          API_ENDPOINTS.GET_PAYMENT_ASSOCIATION(shortName),
+          API_ENDPOINTS.GET_SINGLE_ASSOCIATION,
           {},
           20000
         );
-        
+
         if (!res.ok) {
           if (res.status === 404) {
             throw new Error('ASSOCIATION_NOT_FOUND');
           }
           throw new Error(`HTTP ${res.status}: Failed to fetch association`);
         }
-        
+
         const responseData = await res.json();
         const data = responseData.data;
-        
+
         console.log("✅ Association loaded:", data?.association_name);
-        
+
         setAssociationData(data);
         setPaymentItems(data.payment_items || []);
-        
+
         setLoadError(null);
       } catch (err) {
         console.error("❌ Association fetch error:", err);
-        
+
         if (err.message === 'ASSOCIATION_NOT_FOUND') {
           setLoadError("Association not found");
         } else {
@@ -137,7 +133,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
             message: message || "Unable to load association details. Please check your connection."
           });
         }
-        
+
         setAssociationData(null);
         setPaymentItems([]);
         setSelectedItems([]);
@@ -146,18 +142,13 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
       }
     };
 
-    if (shortName) {
-      fetchAssociation();
-    } else {
-      setLoadError("No association specified");
-      setIsLoading(false);
-    }
-  }, [shortName]);
+    fetchAssociation();
+  }, []); // Empty dependency array since we're not using shortname anymore
 
   // 🔥 NEW: Payment status polling
   const pollPaymentStatus = async () => {
     if (!referenceId) return;
-    
+
     try {
       const res = await fetchWithTimeout(
         API_ENDPOINTS.PAYMENT_STATUS(referenceId),
@@ -165,11 +156,11 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
         10000
       );
       const responseData = await res.json();
-      
+
       if (res.ok && responseData.data) {
         const data = responseData.data;
         setPaymentStatusData(data);
-        
+
         // If payment is verified, stop polling and move to final step
         if (data.is_verified || data.status === 'verified' || data.payment_status === 'verified') {
           if (pollingInterval) {
@@ -190,7 +181,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
     if (currentStep === 3 && referenceId && !pollingInterval) {
       // Poll immediately
       pollPaymentStatus();
-      
+
       // Then poll every 10 seconds
       const interval = setInterval(pollPaymentStatus, 10000);
       setPollingInterval(interval);
@@ -209,7 +200,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
   useEffect(() => {
     const fetchPaymentStatus = async () => {
       if (!referenceId) return;
-      
+
       setStatusLoading(true);
       try {
         const res = await fetchWithTimeout(
@@ -245,12 +236,12 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
   useEffect(() => {
     if (paymentItems.length > 0 && payerData.level) {
       const processedItems = filterAndProcessPaymentItems(paymentItems, payerData.level);
-      
+
       // Auto-select compulsory items for this payer's level
       const compulsoryItems = processedItems
         .filter(item => item.status === 'compulsory')
         .map(item => item.id);
-      
+
       setSelectedItems(compulsoryItems);
     }
   }, [paymentItems, payerData.level]);
@@ -258,10 +249,10 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
   const handleItemSelection = (itemId) => {
     const processedItems = filterAndProcessPaymentItems(paymentItems, payerData.level);
     const item = processedItems.find(i => i.id === itemId);
-    
+
     // Prevent deselecting compulsory items
     if (item && item.status === 'compulsory') return;
-    
+
     setSelectedItems(prev =>
       prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
     );
@@ -270,7 +261,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
   // Update getTotalAmount to use processed items
   const getTotalAmount = () => {
     const processedItems = filterAndProcessPaymentItems(paymentItems, payerData.level);
-    
+
     return selectedItems.reduce((total, itemId) => {
       const item = processedItems.find(p => p.id === itemId);
       return total + (item ? Number(item.amount) : 0);
@@ -290,7 +281,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            association_short_name: associationData?.association_short_name || shortName,
+            association_short_name: associationData?.association_short_name,
             matric_number: payerData.matricNumber,
             email: payerData.email,
             level: payerData.level,
@@ -387,10 +378,10 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
       );
 
       let responseData;
-      try { 
-        responseData = await res.json(); 
-      } catch { 
-        responseData = null; 
+      try {
+        responseData = await res.json();
+      } catch {
+        responseData = null;
       }
 
       console.log("Payment Initiate Response:", responseData); // Debug log
@@ -402,11 +393,11 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
       }
 
       const data = responseData.data;
-      
+
       // 🔥 NEW: Handle Korapay bank transfer response
       if (data.bank_account && data.reference_id) {
         console.log("Bank transfer data received:", data); // Debug log
-        
+
         // Transform the response to match VirtualAccountPayment component expectations
         const transformedData = {
           accountNumber: data.bank_account.account_number,
@@ -425,7 +416,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
           vat: data.vat || 0,
           amount_expected: data.amount_expected
         };
-        
+
         setVirtualAccountData(transformedData);
         setReferenceId(data.reference_id);
         setCurrentStep(3); // Go to virtual account step
@@ -525,15 +516,15 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
   // 🔥 IMPROVED LOADING STATE
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 via-purple-50 to-blue-50">
         <div className="text-center text-gray-700">
           <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4" style={{ color: themeColor }} />
           <h3 className="text-lg font-semibold mb-2">
             {paymentReference ? "Loading Payment Status" : "Loading Association"}
           </h3>
           <p className="text-gray-500">
-            {paymentReference 
-              ? "Please wait while we fetch your payment details..." 
+            {paymentReference
+              ? "Please wait while we fetch your payment details..."
               : "Setting up your payment portal..."
             }
           </p>
@@ -549,14 +540,14 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
   }
 
   // 🔥 ONLY SHOW 404 FOR CONFIRMED ERRORS
-  if (loadError === "Association not found" || (loadError === "No association specified" && !paymentReference)) {
+  if (loadError === "Association not found") {
     return <NotFoundPage message="This association does not exist or is not available." />;
   }
 
   // 🔥 FALLBACK FOR MISSING DATA WITH PAYMENT REFERENCE
   if (!associationData && paymentReference) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 via-purple-50 to-blue-50">
         <div className="text-center max-w-md mx-auto p-8">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
             <div className="text-yellow-600 mb-4">
@@ -572,8 +563,8 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
               <p className="text-xs text-gray-500 mb-1">Reference</p>
               <p className="font-mono text-sm">{paymentReference}</p>
             </div>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               Retry Loading
@@ -600,7 +591,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
         message={modalError.message}
       />
       <div
-        className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900"
+        className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50 to-blue-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900"
         style={dynamicStyles}
       >
         <Header
@@ -613,7 +604,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
             <div className={`space-y-6 sm:space-y-8 ${currentStep < 3 ? 'lg:col-span-2' : 'max-w-4xl mx-auto w-full'}`}>
               <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-md border border-gray-200/50 dark:border-slate-700/50 p-4 sm:p-6 lg:p-8">
                 <div className="flex items-center justify-between mb-6 sm:mb-8">
-                  <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                  <h2 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                     Payment Process
                   </h2>
                   <div className="text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-white font-medium" style={{ backgroundColor: themeColor }}>
@@ -668,7 +659,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
                   )}
                 </div>
               </div>
-              
+
               {/* Mobile Summary - Show between main content and navigation on mobile */}
               {currentStep < 3 && (
                 <div className="lg:hidden">
@@ -681,7 +672,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
                   />
                 </div>
               )}
-              
+
               {/* Navigation */}
               {currentStep < 3 && (
                 <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-md border border-gray-200/50 dark:border-slate-700/50 p-4 sm:p-6">
@@ -697,7 +688,7 @@ const DuesPayPaymentFlow = ({ shortName: propShortName }) => {
                 </div>
               )}
             </div>
-            
+
             {/* Desktop Sidebar - Only show on large screens */}
             {currentStep < 3 && (
               <div className="hidden lg:block">

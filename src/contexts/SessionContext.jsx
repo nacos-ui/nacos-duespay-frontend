@@ -35,16 +35,16 @@ export const SessionProvider = ({ children }) => {
           Authorization: `Bearer ${token}`
         }
       }, 20000);
-      
+
       const responseData = await res.json();
       if (res.ok) {
         const data = responseData.data;
         console.log('SessionContext: Profile fetched successfully:', data);
         setProfile(data);
-        
+
         // Check different possible locations for current session
         let currentSessionFromProfile = null;
-        
+
         // Check various possible paths
         if (data.association?.current_session) {
           currentSessionFromProfile = data.association.current_session;
@@ -64,12 +64,12 @@ export const SessionProvider = ({ children }) => {
             console.log('SessionContext: Using first session as fallback:', currentSessionFromProfile);
           }
         }
-        
+
         if (currentSessionFromProfile) {
           console.log('SessionContext: Setting current session from profile:', currentSessionFromProfile);
           setCurrentSession(currentSessionFromProfile);
         }
-        
+
         return data;
       } else {
         console.error('SessionContext: Failed to fetch profile:', res.status, res.statusText);
@@ -99,7 +99,7 @@ export const SessionProvider = ({ children }) => {
           Authorization: `Bearer ${token}`
         }
       }, 20000);
-      
+
       const responseData = await res.json();
       if (res.ok) {
         const data = responseData.data;
@@ -131,14 +131,14 @@ export const SessionProvider = ({ children }) => {
           Authorization: `Bearer ${token}`
         }
       }, 20000);
-      
+
       const responseData = await res.json();
       if (res.ok) {
         const data = responseData.data;
         console.log('SessionContext: Sessions fetched successfully:', data.results?.length || 0);
         const sessionsList = data.results || [];
         setSessions(sessionsList);
-        
+
         // If we don't have a current session but have sessions available, set the first active one
         if (!currentSession && sessionsList.length > 0) {
           const activeSession = sessionsList.find(session => session.is_active);
@@ -148,7 +148,7 @@ export const SessionProvider = ({ children }) => {
             setCurrentSession(sessionToSet);
           }
         }
-        
+
         return sessionsList;
       } else {
         console.error('SessionContext: Failed to fetch sessions:', res.status, res.statusText);
@@ -179,13 +179,13 @@ export const SessionProvider = ({ children }) => {
       if (res.ok) {
         const data = responseData.data;
         console.log('SessionContext: Set session response:', data);
-        
+
         // Update current session
         const newSession = sessions.find(s => s.id === sessionId);
         if (newSession) {
           console.log('SessionContext: Found session in local sessions:', newSession);
           setCurrentSession(newSession);
-          
+
           // Update profile with new current session
           setProfile(prev => ({
             ...prev,
@@ -194,12 +194,12 @@ export const SessionProvider = ({ children }) => {
               current_session: newSession
             }
           }));
-          
+
           // Trigger a custom event to notify other components
-          window.dispatchEvent(new CustomEvent('sessionChanged', { 
+          window.dispatchEvent(new CustomEvent('sessionChanged', {
             detail: { session: newSession }
           }));
-          
+
           console.log('SessionContext: Session successfully updated');
           return true;
         }
@@ -246,7 +246,7 @@ export const SessionProvider = ({ children }) => {
   const refreshData = async () => {
     console.log('SessionContext: Refreshing all data...');
     setLoading(true);
-    
+
     const token = localStorage.getItem("access_token");
     if (!token) {
       console.log('SessionContext: No token for refresh');
@@ -258,16 +258,16 @@ export const SessionProvider = ({ children }) => {
       // Fetch all data concurrently
       const [profileData, associationData, sessionsData] = await Promise.all([
         fetchProfile(),
-        fetchAssociation(), 
+        fetchAssociation(),
         fetchSessions()
       ]);
-      
-      console.log('SessionContext: Data refresh complete:', { 
-        profileLoaded: !!profileData, 
+
+      console.log('SessionContext: Data refresh complete:', {
+        profileLoaded: !!profileData,
         associationLoaded: !!associationData,
-        sessionsCount: sessionsData?.length || 0 
+        sessionsCount: sessionsData?.length || 0
       });
-      
+
       setLoading(false);
       return true;
     } catch (error) {
@@ -280,12 +280,12 @@ export const SessionProvider = ({ children }) => {
   // Add this helper function inside SessionProvider
   const validateTokens = () => {
     const accessToken = localStorage.getItem('access_token');
-    
+
     console.log('SessionContext: Validating tokens:', {
       hasAccessToken: !!accessToken,
       accessTokenPreview: accessToken ? accessToken.substring(0, 20) + '...' : null
     });
-    
+
     return { accessToken, isValid: !!accessToken };
   };
 
@@ -293,43 +293,43 @@ export const SessionProvider = ({ children }) => {
   useEffect(() => {
     const initializeSession = async () => {
       if (initialized) return; // Prevent double initialization
-      
+
       console.log('SessionContext: Initializing session context...');
       setLoading(true);
-      
+
       const tokenCheck = validateTokens();
-      
+
       if (tokenCheck.isValid) {
         try {
           // Small delay to ensure other components are ready
           await new Promise(resolve => setTimeout(resolve, 100));
-          
+
           // Fetch all data concurrently
           const [profileData, associationData, sessionsData] = await Promise.all([
             fetchProfile(),
             fetchAssociation(),
             fetchSessions()
           ]);
-          
-          console.log('SessionContext: Initialization complete:', { 
-            profileLoaded: !!profileData, 
+
+          console.log('SessionContext: Initialization complete:', {
+            profileLoaded: !!profileData,
             associationLoaded: !!associationData,
-            sessionsCount: sessionsData?.length || 0 
+            sessionsCount: sessionsData?.length || 0
           });
         } catch (error) {
           console.error('SessionContext: Error during initialization:', error);
         }
       } else {
-        console.log('SessionContext: No valid tokens found during initialization');
+        console.log('SessionContext: No valid tokens found - skipping authenticated data fetch');
       }
-      
+
       setLoading(false);
       setInitialized(true);
       console.log('SessionContext: Session context initialized');
     };
 
     initializeSession();
-  }, []); // Remove dependencies to prevent re-initialization
+  }, []); // Empty dependency array to prevent re-initialization
 
   // Listen for storage changes (token updates)
   useEffect(() => {
@@ -341,7 +341,7 @@ export const SessionProvider = ({ children }) => {
           newValue: e.newValue ? 'exists' : 'null',
           loading
         });
-        
+
         // 🔥 FIX: Debounce rapid changes
         clearTimeout(window.tokenChangeTimeout);
         window.tokenChangeTimeout = setTimeout(() => {
