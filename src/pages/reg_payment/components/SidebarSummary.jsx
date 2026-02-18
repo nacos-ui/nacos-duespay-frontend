@@ -1,100 +1,128 @@
 import React from 'react';
-import { CreditCard, Mail, Phone, MessageCircle } from 'lucide-react';
+import { CreditCard, Mail, Phone, CheckCircle2 } from 'lucide-react';
 
 const SidebarSummary = ({
   paymentItems,
   selectedItems,
   themeColor,
   getTotalAmount,
-  formatTotal
-}) => (
-  <div className="space-y-6">
-    {/* Payment Summary */}
-    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-md border border-gray-200/50 dark:border-slate-700/50 overflow-hidden">
-      <div className="h-1" style={{ background: `linear-gradient(90deg, ${themeColor}, ${themeColor}60)` }}></div>
-      <div className="p-4 sm:p-6">
-        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center gap-2">
-          <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: themeColor }} />
-          Payment Summary
+  formatTotal,
+  steps,
+  currentStep
+}) => {
+  return (
+    <div className="space-y-6">
+
+      {/* Desktop Steps Navigation - Clean Vertical List */}
+      <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
+          Payment Progress
         </h3>
-        <div className="space-y-3 sm:space-y-4">
-          {selectedItems.map(itemId => {
-            const item = paymentItems.find(p => p.id === itemId);
-            if (!item) return null;
+        <div className="space-y-4">
+          {steps && steps.map((step) => {
+            const isActive = currentStep === step.number;
+            const isCompleted = currentStep > step.number;
+
             return (
-              <div key={itemId} className="flex justify-between items-center p-3 sm:p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white dark:from-slate-700 dark:to-slate-600 border border-gray-100 dark:border-slate-600">
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">
-                    {item.title}
-                  </p>
-                  <p className="text-xs px-2 py-1 rounded-full text-white capitalize text-center mt-1 inline-block" 
-                     style={{ backgroundColor: item.status === 'compulsory' ? '#ef4444' : themeColor }}>
-                    {item.status}
+              <div key={step.number} className="flex items-center gap-3">
+                <div className={`
+                        flex items-center justify-center w-8 h-8 rounded-full border-2 
+                        ${isCompleted ? 'bg-emerald-50 border-emerald-500 text-emerald-600' :
+                    isActive ? 'border-gray-900 text-gray-900' : 'border-gray-200 text-gray-300'}
+                     `}
+                  style={isActive ? { borderColor: themeColor, color: themeColor } : {}}
+                >
+                  {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <div className="text-sm font-bold">{step.number}</div>}
+                </div>
+                <div>
+                  <p className={`text-sm font-medium ${isActive || isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>
+                    {step.title}
                   </p>
                 </div>
-                <p className="text-lg sm:text-xl font-bold ml-2" style={{ color: themeColor }}>
-                  ₦{item.amount.toLocaleString()}
-                </p>
               </div>
             );
           })}
-          {selectedItems.length === 0 && (
-            <div className="text-center py-8 sm:py-12 text-gray-500 dark:text-slate-400">
-              <CreditCard className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 opacity-30" />
-              <p className="text-base sm:text-lg">No items selected</p>
-              <p className="text-xs sm:text-sm">Please select payment items to continue</p>
+        </div>
+      </div>
+
+      {/* Payment Summary - Hide on last step */}
+      {currentStep !== 4 && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4 flex items-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            Invoice Summary
+          </h3>
+
+          {selectedItems.length > 0 ? (
+            <div className="space-y-3">
+              {selectedItems.map(itemId => {
+                const item = paymentItems.find(p => p.id === itemId);
+                if (!item) return null;
+                return (
+                  <div key={itemId} className="flex justify-between items-start text-sm">
+                    <div className="flex-1 pr-2">
+                      <span className="text-gray-700">{item.title}</span>
+                    </div>
+                    <span className="font-semibold text-gray-900 whitespace-nowrap">₦{item.amount.toLocaleString()}</span>
+                  </div>
+                );
+              })}
+
+              <div className="pt-4 mt-4 border-t border-gray-100 flex justify-between items-center">
+                <span className="text-base font-bold text-gray-900">Total</span>
+                <span className="text-xl font-bold" style={{ color: themeColor }}>
+                  {formatTotal(getTotalAmount())}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-6 text-gray-400 text-sm">
+              No items selected yet.
             </div>
           )}
         </div>
-        {selectedItems.length > 0 && (
-          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t-2 border-dashed border-gray-200 dark:border-slate-600">
-            <div className="flex justify-between items-center p-3 sm:p-4 rounded-xl" 
-                 style={{ backgroundColor: `${themeColor}10` }}>
-              <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-                Total Amount
-              </p>
-              <p className="text-2xl sm:text-3xl font-bold" style={{ color: themeColor }}>
-                {formatTotal(getTotalAmount())}
-              </p>
+      )}
+
+      {/* Support Links */}
+      <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
+          Need Assistance?
+        </h3>
+        <div className="space-y-3">
+          <a
+            href="mailto:support@duespay.com"
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
+          >
+            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+              <Mail className="w-4 h-4" />
             </div>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 sm:mt-3 text-center">
-              * Gateway processing fees may be added at checkout
-            </p>
-          </div>
-        )}
+            <div className="min-w-0">
+              <p className="font-medium text-sm text-gray-900">Email Support</p>
+              <p className="text-xs text-gray-500 truncate">support@duespay.com</p>
+            </div>
+          </a>
+          <a
+            href="tel:+2349034049655"
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
+          >
+            <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <Phone className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-medium text-sm text-gray-900">Phone Support</p>
+              <p className="text-xs text-gray-500 truncate">+234 903 404 9655</p>
+            </div>
+          </a>
+        </div>
       </div>
-    </div>
-    
-    {/* Support Links - Only show on desktop in sidebar */}
-    <div className="hidden lg:block bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-md border border-gray-200/50 dark:border-slate-700/50 p-4 sm:p-6">
-      <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
-        <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: themeColor }} />
-        Need Help?
-      </h3>
-      <div className="space-y-3">
-        <a
-          href="mailto:support@duespay.com"
-          className="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-700 dark:to-slate-600 hover:shadow-md transition-all"
-        >
-          <Mail className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" style={{ color: themeColor }} />
-          <div className="min-w-0">
-            <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">Email Support</p>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 truncate">support@duespay.com</p>
-          </div>
-        </a>
-        <a
-          href="tel:+2349034049655"
-          className="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-green-50 to-blue-50 dark:from-slate-700 dark:to-slate-600 hover:shadow-md transition-all"
-        >
-          <Phone className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" style={{ color: themeColor }} />
-          <div className="min-w-0">
-            <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">Phone Support</p>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 truncate">+234 903 404 9655</p>
-          </div>
-        </a>
+
+      {/* Mobile Only: Quick Contact Text */}
+      <div className="lg:hidden text-center text-xs text-gray-400 mt-2">
+        Issues? Contact <a href="mailto:support@duespay.com" className="font-medium underline decoration-dotted">Support</a>
       </div>
+
     </div>
-  </div>
-);
+  );
+};
 
 export default SidebarSummary;

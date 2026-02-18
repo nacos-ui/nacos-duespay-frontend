@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2, User, CreditCard, Receipt } from 'lucide-react';
 import Header from './components/Header';
-import ProgressSteps from './components/ProgressSteps';
 import RegistrationStep from './components/RegistrationStep';
 import PaymentSelectionStep from './components/PaymentSelectionStep';
 import VirtualAccountPayment from './components/VirtualAccountPayment';
@@ -516,7 +515,7 @@ const DuesPayPaymentFlow = () => {
   // 🔥 IMPROVED LOADING STATE
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 via-purple-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center text-gray-700">
           <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4" style={{ color: themeColor }} />
           <h3 className="text-lg font-semibold mb-2">
@@ -529,7 +528,7 @@ const DuesPayPaymentFlow = () => {
             }
           </p>
           {paymentReference && (
-            <div className="mt-4 p-3 bg-white/80 rounded-lg shadow-sm">
+            <div className="mt-4 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
               <p className="text-xs text-gray-500 mb-1">Payment Reference</p>
               <p className="font-mono text-sm">{paymentReference}</p>
             </div>
@@ -547,7 +546,7 @@ const DuesPayPaymentFlow = () => {
   // 🔥 FALLBACK FOR MISSING DATA WITH PAYMENT REFERENCE
   if (!associationData && paymentReference) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 via-purple-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md mx-auto p-8">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
             <div className="text-yellow-600 mb-4">
@@ -580,8 +579,6 @@ const DuesPayPaymentFlow = () => {
     return <NotFoundPage message="Unable to load association data." />;
   }
 
-  const dynamicStyles = generateThemeStyles(themeColor);
-
   return (
     <>
       <ErrorModal
@@ -590,64 +587,95 @@ const DuesPayPaymentFlow = () => {
         title={modalError.title}
         message={modalError.message}
       />
-      <div
-        className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50 to-blue-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900"
-        style={dynamicStyles}
-      >
+
+      <div className="min-h-screen bg-gray-50 font-sans text-slate-900">
         <Header
           associationData={associationData}
           themeColor={themeColor}
         />
-        <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
-          <div className={`grid gap-6 sm:gap-8 ${currentStep < 3 ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
-            {/* Main Content */}
-            <div className={`space-y-6 sm:space-y-8 ${currentStep < 3 ? 'lg:col-span-2' : 'max-w-4xl mx-auto w-full'}`}>
-              <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-md border border-gray-200/50 dark:border-slate-700/50 p-4 sm:p-6 lg:p-8">
-                <div className="flex items-center justify-between mb-6 sm:mb-8">
-                  <h2 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                    Payment Process
-                  </h2>
-                  <div className="text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-white font-medium" style={{ backgroundColor: themeColor }}>
-                    Step {currentStep} of {steps.length}
-                  </div>
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+          {/* Main Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
+            {/* Left Column: Main Content */}
+            <div className="lg:col-span-2 space-y-8">
+
+              {/* Mobile Step Indicator */}
+              <div className="lg:hidden bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold uppercase text-gray-500 tracking-wider">Current Step</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {currentStep} / {steps.length}
+                  </span>
                 </div>
-                <ProgressSteps steps={steps} currentStep={currentStep} themeColor={themeColor} />
+                <div className="w-full bg-gray-100 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${(currentStep / steps.length) * 100}%`, backgroundColor: themeColor }}
+                  />
+                </div>
+                <p className="mt-2 text-sm font-medium text-gray-900">
+                  {steps[currentStep - 1]?.title}
+                </p>
               </div>
-              <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-md border border-gray-200/50 dark:border-slate-700/50 overflow-hidden">
-                <div className="h-2" style={{ background: `linear-gradient(90deg, ${themeColor}, ${themeColor}80, ${themeColor})` }}></div>
-                <div className="p-4 sm:p-6 lg:p-8">
+
+              {/* Content Card */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden min-h-[500px]">
+                <div className={`transition-all duration-300 ${currentStep === 4 ? "p-0 h-full" : "p-6 md:p-8"}`}>
                   {currentStep === 1 && (
-                    <RegistrationStep
-                      ref={registrationStepRef}
-                      payerData={payerData}
-                      handleInputChange={(f, v) => setPayerData(prev => ({ ...prev, [f]: v }))}
-                      error={regError}
-                      loading={regLoading}
-                      associationData={associationData}
-                      themeColor={themeColor}
-                    />
+                    <div className="space-y-6">
+                      <div className="border-b border-gray-100 pb-4 mb-4">
+                        <h2 className="text-2xl font-bold text-gray-900">Student Information</h2>
+                        <p className="text-gray-500">Please enter your details to verify your identity.</p>
+                      </div>
+                      <RegistrationStep
+                        ref={registrationStepRef}
+                        payerData={payerData}
+                        handleInputChange={(f, v) => setPayerData(prev => ({ ...prev, [f]: v }))}
+                        error={regError}
+                        loading={regLoading}
+                        associationData={associationData}
+                        themeColor={themeColor}
+                      />
+                    </div>
                   )}
+
                   {currentStep === 2 && (
-                    <PaymentSelectionStep
-                      paymentItems={filterAndProcessPaymentItems(paymentItems, payerData.level)}
-                      selectedItems={selectedItems}
-                      handleItemSelection={handleItemSelection}
-                      associationData={associationData}
-                      getTotalAmount={getTotalAmount}
-                      themeColor={themeColor}
-                      hideBankDetails
-                    />
+                    <div className="space-y-6">
+                      <div className="border-b border-gray-100 pb-4 mb-4">
+                        <h2 className="text-2xl font-bold text-gray-900">Select Payments</h2>
+                        <p className="text-gray-500">Choose the items you wish to pay for.</p>
+                      </div>
+                      <PaymentSelectionStep
+                        paymentItems={filterAndProcessPaymentItems(paymentItems, payerData.level)}
+                        selectedItems={selectedItems}
+                        handleItemSelection={handleItemSelection}
+                        associationData={associationData}
+                        getTotalAmount={getTotalAmount}
+                        themeColor={themeColor}
+                        hideBankDetails
+                      />
+                    </div>
                   )}
-                  {/* 🔥 NEW: Virtual Account Payment Step */}
+
                   {currentStep === 3 && virtualAccountData && (
-                    <VirtualAccountPayment
-                      accountData={virtualAccountData}
-                      onPaymentVerified={() => setCurrentStep(4)}
-                      onCheckPayment={handleCheckPayment}
-                      themeColor={themeColor}
-                      referenceId={referenceId}
-                    />
+                    <div className="space-y-6">
+                      <div className="border-b border-gray-100 pb-4 mb-4">
+                        <h2 className="text-2xl font-bold text-gray-900">Make Payment</h2>
+                        <p className="text-gray-500">Transfer the exact amount to the account below.</p>
+                      </div>
+                      <VirtualAccountPayment
+                        accountData={virtualAccountData}
+                        onPaymentVerified={() => setCurrentStep(4)}
+                        onCheckPayment={handleCheckPayment}
+                        themeColor={themeColor}
+                        referenceId={referenceId}
+                      />
+                    </div>
                   )}
+
                   {currentStep === 4 && (
                     <PaymentStatusStep
                       referenceId={referenceId}
@@ -658,51 +686,41 @@ const DuesPayPaymentFlow = () => {
                     />
                   )}
                 </div>
+
+                {/* Navigation Buttons Area (Inside Card for unified look, or could be outside) */}
+                {currentStep < 3 && (
+                  <div className="px-6 md:px-8 py-4 bg-gray-50 border-t border-gray-100">
+                    <NavigationButtons
+                      currentStep={currentStep}
+                      canProceed={canProceed}
+                      regLoading={regLoading}
+                      payLoading={payLoading}
+                      prevStep={prevStep}
+                      nextStep={nextStep}
+                      themeColor={themeColor}
+                    />
+                  </div>
+                )}
               </div>
-
-              {/* Mobile Summary - Show between main content and navigation on mobile */}
-              {currentStep < 3 && (
-                <div className="lg:hidden">
-                  <SidebarSummary
-                    paymentItems={filterAndProcessPaymentItems(paymentItems, payerData.level)}
-                    selectedItems={selectedItems}
-                    themeColor={themeColor}
-                    getTotalAmount={getTotalAmount}
-                    formatTotal={formatTotal}
-                  />
-                </div>
-              )}
-
-              {/* Navigation */}
-              {currentStep < 3 && (
-                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-md border border-gray-200/50 dark:border-slate-700/50 p-4 sm:p-6">
-                  <NavigationButtons
-                    currentStep={currentStep}
-                    canProceed={canProceed}
-                    regLoading={regLoading}
-                    payLoading={payLoading}
-                    prevStep={prevStep}
-                    nextStep={nextStep}
-                    themeColor={themeColor}
-                  />
-                </div>
-              )}
             </div>
 
-            {/* Desktop Sidebar - Only show on large screens */}
-            {currentStep < 3 && (
-              <div className="hidden lg:block">
+            {/* Right Column: Sidebar (Detailed Summary) */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-8">
                 <SidebarSummary
                   paymentItems={filterAndProcessPaymentItems(paymentItems, payerData.level)}
                   selectedItems={selectedItems}
                   themeColor={themeColor}
                   getTotalAmount={getTotalAmount}
                   formatTotal={formatTotal}
+                  steps={steps}
+                  currentStep={currentStep}
                 />
               </div>
-            )}
+            </div>
+
           </div>
-        </div>
+        </main>
       </div>
     </>
   );
