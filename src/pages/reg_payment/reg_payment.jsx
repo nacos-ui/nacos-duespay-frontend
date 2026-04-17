@@ -708,6 +708,7 @@ const DuesPayPaymentFlow = () => {
             <div className="lg:col-span-1">
               <div className="sticky top-8">
                 <SidebarSummary
+                  associationData={associationData}
                   paymentItems={filterAndProcessPaymentItems(paymentItems, payerData.level)}
                   selectedItems={selectedItems}
                   themeColor={themeColor}

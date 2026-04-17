@@ -8,8 +8,12 @@ const SidebarSummary = ({
   getTotalAmount,
   formatTotal,
   steps,
-  currentStep
+  currentStep,
+  associationData
 }) => {
+  const adminEmail = associationData?.admin_email;
+  const adminPhone = associationData?.admin_phone;
+
   return (
     <div className="space-y-6">
 
@@ -84,41 +88,49 @@ const SidebarSummary = ({
       )}
 
       {/* Support Links */}
-      <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
-          Need Assistance?
-        </h3>
-        <div className="space-y-3">
-          <a
-            href="mailto:support@duespay.com"
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
-          >
-            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-              <Mail className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-medium text-sm text-gray-900">Email Support</p>
-              <p className="text-xs text-gray-500 truncate">support@duespay.com</p>
-            </div>
-          </a>
-          <a
-            href="tel:+2349034049655"
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
-          >
-            <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-              <Phone className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-medium text-sm text-gray-900">Phone Support</p>
-              <p className="text-xs text-gray-500 truncate">+234 903 404 9655</p>
-            </div>
-          </a>
+      {(adminEmail || adminPhone) && (
+        <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">
+            Need Assistance?
+          </h3>
+          <div className="space-y-3">
+            {adminEmail && (
+              <a
+                href={`mailto:${adminEmail}`}
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
+              >
+                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-sm text-gray-900">Email Support</p>
+                  <p className="text-xs text-gray-500 truncate">{adminEmail}</p>
+                </div>
+              </a>
+            )}
+            {adminPhone && (
+              <a
+                href={`tel:${adminPhone}`}
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
+              >
+                <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-sm text-gray-900">Phone Support</p>
+                  <p className="text-xs text-gray-500 truncate">{adminPhone}</p>
+                </div>
+              </a>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Mobile Only: Quick Contact Text */}
       <div className="lg:hidden text-center text-xs text-gray-400 mt-2">
-        Issues? Contact <a href="mailto:support@duespay.com" className="font-medium underline decoration-dotted">Support</a>
+        Issues? Contact {adminEmail ? (
+          <a href={`mailto:${adminEmail}`} className="font-medium underline decoration-dotted">Support</a>
+        ) : 'the administrator'}
       </div>
 
     </div>

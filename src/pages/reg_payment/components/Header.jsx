@@ -28,13 +28,15 @@ const Header = ({ associationData, themeColor }) => {
           <p className="text-sm text-slate-400 truncate">Official Payment Portal</p>
         </div>
 
-        {/* Optional: Simple Contact Indicator */}
-        <div className="hidden sm:block text-right">
-          <div className="text-xs text-slate-500 font-medium">Have issues?</div>
-          <a href="mailto:support@duespay.com" className="text-sm font-medium hover:text-white transition-colors" style={{ color: themeColor }}>
-            Contact Support
-          </a>
-        </div>
+        {/* Dynamic Contact Link */}
+        {associationData.admin_email && (
+          <div className="hidden sm:block text-right">
+            <div className="text-xs text-slate-500 font-medium">Have issues?</div>
+            <a href={`mailto:${associationData.admin_email}`} className="text-sm font-medium hover:text-white transition-colors" style={{ color: themeColor }}>
+              Contact Support
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
