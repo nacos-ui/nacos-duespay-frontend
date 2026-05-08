@@ -1,41 +1,38 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const NotFoundPage = () => {
-  const [showPopup, setShowPopup] = useState(false);
-
-  const handleBeamMeHome = (e) => {
-    e.preventDefault();
-    setShowPopup(true);
-    setTimeout(() => setShowPopup(false), 2500);
-  };
+const NotFoundPage = ({ message }) => {
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f111f]">
       <div className="w-full max-w-lg mx-auto text-center p-8 rounded-2xl shadow-2xl bg-[#23263a] border border-[#101828]">
-        <img
-          src="/Security_Research.gif"
-          alt="404 Not Found"
-          className="h-48 w-auto mx-auto mb-6 rounded-xl shadow-lg border border-[#101828] bg-[#101828] object-contain"
-          style={{ background: "#101828" }}
-        />
-        <h1 className="text-5xl font-extrabold text-[#8200db] mb-3 tracking-tight">404</h1>
-        <h2 className="text-2xl font-bold text-white mb-2">Lost in Space?</h2>
+        <div className="font-mono text-sm text-gray-500 mb-4 text-left bg-[#101828] rounded-lg px-4 py-3">
+          <span className="text-green-400">GET</span>{' '}
+          <span className="text-yellow-300">{window.location.pathname}</span>{' '}
+          <span className="text-red-400">404 Not Found</span>
+        </div>
+        <h1 className="text-7xl font-extrabold text-[#8200db] mb-3 tracking-tight font-mono">404</h1>
+        <h2 className="text-2xl font-bold text-white mb-2">Page.exe has stopped working.</h2>
         <p className="text-lg text-gray-300 mb-6">
-          Oops! Looks like you've wandered into an unknown part of the DuesPay universe.<br />
-          <span className="text-[#8200db] font-semibold">This page doesn't exist</span>... or maybe it's just hiding from you.<br />
-          <span className="italic text-gray-400">Don't worry, even astronauts get lost sometimes.</span>
+          {message || (
+            <>
+              The resource you requested{' '}
+              <span className="text-[#8200db] font-semibold font-mono">null</span>
+              {' '}— it was never there, or someone deleted it and didn't write a migration.
+              <br />
+              <span className="italic text-gray-400 text-base">
+                Have you tried turning the URL off and on again?
+              </span>
+            </>
+          )}
         </p>
         <button
-          onClick={handleBeamMeHome}
-          className="inline-block px-8 py-3 bg-[#8200db] text-white rounded-xl font-semibold shadow hover:bg-purple-700 transition-colors"
+          onClick={() => navigate('/pay')}
+          className="inline-block px-8 py-3 bg-[#8200db] text-white rounded-xl font-semibold shadow hover:bg-purple-700 transition-colors font-mono"
         >
-          🚀 Beam Me Home
+          {'>'} go /pay
         </button>
-        {showPopup && (
-          <div className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-[#23263a] border border-[#8200db] text-white px-6 py-4 rounded-2xl shadow-2xl mt-6 animate-bounce">
-            Hehe, this doesn't do anything. Find your way around yourself!
-          </div>
-        )}
       </div>
     </div>
   );

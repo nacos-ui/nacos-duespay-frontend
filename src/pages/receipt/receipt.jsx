@@ -544,6 +544,21 @@ const ReceiptPage = () => {
               right: "24px",
               textAlign: "right"
             }}>
+              {import.meta.env.VITE_ADMIN_SIGNATURE_URL && (
+                <img
+                  src={import.meta.env.VITE_ADMIN_SIGNATURE_URL}
+                  alt="Authorized Signature"
+                  crossOrigin="anonymous"
+                  style={{
+                    height: "48px",
+                    maxWidth: "160px",
+                    objectFit: "contain",
+                    display: "block",
+                    marginLeft: "auto",
+                    marginBottom: "2px"
+                  }}
+                />
+              )}
               <div style={{
                 width: "120px",
                 height: "1px",
