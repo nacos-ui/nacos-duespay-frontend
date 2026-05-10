@@ -77,9 +77,9 @@ const AuthPage = () => {
             <div className="text-center text-white space-y-6">
               <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
                 <img
-                  src="/Duespay_logo.png"
+                  src="/nacos_logo.png"
                   alt="DuesPay Logo"
-                  className="h-16 w-16 mx-auto mb-4 rounded-xl bg-transparent object-cover"
+                  className="h-40 w-40 mx-auto transform translate-y-5 rounded-xl bg-transparent object-cover"
                 />
                 <h1 className="text-3xl font-bold mb-2">DuesPay</h1>
                 <p className="text-lg text-white/80">Streamline the payment and management of dues</p>
