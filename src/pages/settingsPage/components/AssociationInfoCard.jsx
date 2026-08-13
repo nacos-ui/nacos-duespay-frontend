@@ -18,6 +18,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
       association_short_name: assoc.association_short_name || "",
       association_type: assoc.association_type || "",
       theme_color: assoc.theme_color || "#9810fa",
+      is_maintenance_mode: assoc.is_maintenance_mode ?? false,
     }
     : {};
 
@@ -114,7 +115,6 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
           body: formData,
         };
 
-        // Use native fetch for FormData uploads
         const res = await fetchWithTimeout(url, requestOptions);
 
         const responseData = await res.json();
@@ -126,9 +126,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
           setLogoFile(null);
           onUpdated({ results: [updated] });
 
-          // 🔥 ADD THIS LINE - Trigger context refresh
           await triggerContextRefresh();
-
         } else {
           const error = await res.json();
           console.error('API Error:', error);
@@ -138,7 +136,6 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
           });
         }
       } else {
-        // Use the wrapper for JSON-only updates (no files)
         requestOptions = {
           method,
           headers: {
@@ -150,6 +147,7 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
             association_short_name: form.association_short_name,
             association_type: form.association_type,
             theme_color: form.theme_color,
+            is_maintenance_mode: form.is_maintenance_mode ?? false,
           }),
         };
 
@@ -178,6 +176,43 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
       setMessage({ type: 'error', text: errorInfo.message });
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Quick toggle for maintenance mode without a full form save
+  const handleMaintenanceToggle = async (enabled) => {
+    if (!assoc?.id) return;
+    const token = localStorage.getItem("access_token");
+    setMessage({ type: '', text: '' });
+    try {
+      const res = await fetchWithTimeout(
+        API_ENDPOINTS.UPDATE_ASSOCIATION(assoc.id),
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ is_maintenance_mode: enabled }),
+        },
+        15000
+      );
+      if (res.ok) {
+        const responseData = await res.json();
+        const updated = responseData.data;
+        onUpdated({ results: [updated] });
+        setMessage({
+          type: 'success',
+          text: enabled
+            ? 'Maintenance mode enabled. The /pay page is now showing a maintenance screen.'
+            : 'Maintenance mode disabled. The /pay page is now live.',
+        });
+      } else {
+        setMessage({ type: 'error', text: 'Failed to update maintenance mode.' });
+      }
+    } catch (error) {
+      const errorInfo = handleFetchError(error);
+      setMessage({ type: 'error', text: errorInfo.message });
     }
   };
 
@@ -306,6 +341,27 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
             </select>
           </div>
 
+          {/* Maintenance mode toggle in edit mode */}
+          <div className="flex items-center justify-between p-3 bg-[#1a1d30] rounded-lg border border-gray-700">
+            <div>
+              <p className="text-white text-sm font-medium">Maintenance Mode</p>
+              <p className="text-gray-400 text-xs mt-0.5">Disables the payment page for students</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setForm(f => ({ ...f, is_maintenance_mode: !f.is_maintenance_mode }))}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                form.is_maintenance_mode ? 'bg-orange-500' : 'bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                  form.is_maintenance_mode ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
           <div className="flex gap-2 mt-4">
             <button
               className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors disabled:opacity-50"
@@ -394,6 +450,36 @@ export default function AssociationInfoCard({ data, loading, onUpdated }) {
                 <span className="text-white">—</span>
               )}
             </div>
+          </div>
+
+          {/* Maintenance mode quick-toggle */}
+          <div className="flex items-center justify-between p-3 bg-[#1a1d30] rounded-lg border border-gray-700 mt-2">
+            <div>
+              <p className="text-white text-sm font-medium flex items-center gap-2">
+                <span className={`inline-block w-2 h-2 rounded-full ${
+                  assoc?.is_maintenance_mode ? 'bg-orange-400 animate-pulse' : 'bg-green-400'
+                }`} />
+                Maintenance Mode
+              </p>
+              <p className="text-gray-400 text-xs mt-0.5">
+                {assoc?.is_maintenance_mode
+                  ? 'Payment page is showing maintenance screen'
+                  : 'Payment page is live'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleMaintenanceToggle(!assoc?.is_maintenance_mode)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                assoc?.is_maintenance_mode ? 'bg-orange-500' : 'bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                  assoc?.is_maintenance_mode ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
           </div>
         </div>
       )}

@@ -13,12 +13,15 @@ import { fetchWithTimeout, handleFetchError } from "../../utils/fetchUtils";
 import { exportPayers } from "../../utils/exportUtils"; 
 import { useSession } from "../../contexts/SessionContext";
 
+const PAGE_SIZE = 7;
+
 export default function PayersPage() {
   const [payers, setPayers] = useState([]);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
+  const [associationType, setAssociationType] = useState("");
 
   // Bulk actions
   const [selectedPayers, setSelectedPayers] = useState([]);
@@ -42,6 +45,26 @@ export default function PayersPage() {
   const [showPayerTransactions, setShowPayerTransactions] = useState(false);
   const [selectedMatric, setSelectedMatric] = useState(null);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+
+  // Fetch association type (to conditionally show/hide faculty filter)
+  useEffect(() => {
+    const fetchAssocType = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        const res = await fetchWithTimeout(API_ENDPOINTS.GET_ASSOCIATION, {
+          headers: { Authorization: `Bearer ${token}` }
+        }, 15000);
+        if (res.ok) {
+          const data = await res.json();
+          const assoc = data?.data?.results?.[0] || data?.data || null;
+          setAssociationType(assoc?.association_type || "");
+        }
+      } catch (e) {
+        // silent fail – filter just stays visible
+      }
+    };
+    fetchAssocType();
+  }, []);
 
   // Fetch payers
   const fetchPayers = async (page = 1, isBackgroundFetch = false) => {
@@ -238,13 +261,15 @@ export default function PayersPage() {
             onChange={e => setSearch(e.target.value)}
             className="bg-[#23263A] border border-[#23263A] text-white px-4 py-2 rounded w-64 focus:outline-none"
           />
-          <input
-            type="text"
-            placeholder="All Faculties"
-            value={faculty}
-            onChange={e => setFaculty(e.target.value)}
-            className="bg-[#23263A] border border-[#23263A] text-white px-4 py-2 rounded"
-          />
+          {associationType !== "faculty" && (
+            <input
+              type="text"
+              placeholder="All Faculties"
+              value={faculty}
+              onChange={e => setFaculty(e.target.value)}
+              className="bg-[#23263A] border border-[#23263A] text-white px-4 py-2 rounded"
+            />
+          )}
           <input
             type="text"
             placeholder="All Departments"
@@ -313,6 +338,8 @@ export default function PayersPage() {
           }}
           selectedPayers={selectedPayers}
           setSelectedPayers={setSelectedPayers}
+          page={page}
+          pageSize={PAGE_SIZE}
         />
         
         <Pagination

@@ -11,6 +11,8 @@ import { fetchWithTimeout, handleFetchError } from "../../utils/fetchUtils";
 import { exportTransactions } from "../../utils/exportUtils";
 import { useSession } from "../../contexts/SessionContext";
 
+const PAGE_SIZE = 7;
+
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
   const [count, setCount] = useState(0);
@@ -346,6 +348,8 @@ export default function TransactionsPage() {
           onViewDetails={setSelected}
           selectedTransactions={selectedTransactions}
           setSelectedTransactions={setSelectedTransactions}
+          page={page}
+          pageSize={PAGE_SIZE}
         />
         
         <Pagination

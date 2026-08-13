@@ -579,6 +579,111 @@ const DuesPayPaymentFlow = () => {
     return <NotFoundPage message="Unable to load association data." />;
   }
 
+  // 🔧 MAINTENANCE MODE SCREEN
+  if (associationData.is_maintenance_mode) {
+    const isDark = isColorDark(themeColor);
+    return (
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f8f9fb' }}>
+        {/* Top accent bar */}
+        <div className="h-1.5 w-full" style={{ background: `linear-gradient(90deg, ${themeColor}, ${themeColor}aa)` }} />
+
+        {/* Header */}
+        <div className="flex items-center justify-center py-6 border-b border-gray-100 bg-white shadow-sm">
+          {associationData.logo_url ? (
+            <img
+              src={associationData.logo_url}
+              alt={associationData.association_name}
+              className="h-10 w-10 rounded-full object-cover mr-3 shadow"
+            />
+          ) : (
+            <div
+              className="h-10 w-10 rounded-full mr-3 flex items-center justify-center text-white font-bold text-lg shadow"
+              style={{ backgroundColor: themeColor }}
+            >
+              {associationData.association_name?.[0] || 'A'}
+            </div>
+          )}
+          <span className="font-bold text-gray-800 text-lg">
+            {associationData.association_name}
+          </span>
+        </div>
+
+        {/* Main content */}
+        <div className="flex-1 flex items-center justify-center px-4 py-16">
+          <div className="max-w-lg w-full text-center">
+            {/* Animated icon */}
+            <div
+              className="relative inline-flex items-center justify-center w-36 h-36 rounded-full mx-auto mb-8 shadow-xl"
+              style={{ background: `linear-gradient(135deg, ${themeColor}22, ${themeColor}44)` }}
+            >
+              {/* Pulsing ring */}
+              <span
+                className="absolute inset-0 rounded-full animate-ping opacity-20"
+                style={{ backgroundColor: themeColor }}
+              />
+              {/* Wrench / tools icon */}
+              <svg
+                className="w-16 h-16"
+                style={{ color: themeColor }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
+              We're Under{' '}
+              <span style={{ color: themeColor }}>Maintenance</span>
+            </h1>
+
+            {/* Description */}
+            <p className="text-gray-500 text-lg mb-8 leading-relaxed">
+              Our payment portal is temporarily unavailable while we make improvements.
+              Please check back later.
+            </p>
+
+            {/* Info card */}
+            <div
+              className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl border text-sm font-medium shadow-sm"
+              style={{
+                borderColor: `${themeColor}44`,
+                backgroundColor: `${themeColor}0d`,
+                color: themeColor,
+              }}
+            >
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              We appreciate your patience. This won't take long.
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="py-6 text-center border-t border-gray-100 bg-white">
+          <p className="text-gray-400 text-sm">
+            &copy; {new Date().getFullYear()} {associationData.association_name} &mdash; Powered by DuesPay
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <ErrorModal
