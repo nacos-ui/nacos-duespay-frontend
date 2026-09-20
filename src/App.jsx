@@ -19,6 +19,9 @@ import { ErrorProvider } from './contexts/ErrorContext';
 import PaymentCallback from './pages/payment/PaymentCallback';
 import { useGlobalError } from './contexts/ErrorContext';
 import { setGlobalErrorSetter } from './utils/api';
+import StudentLogin from './pages/student/StudentLogin';
+import StudentDashboard from './pages/student/StudentDashboard';
+import ReceiptsPage from './pages/receipts/ReceiptsPage';
 
 function App() {
   function GlobalErrorSetter() {
@@ -41,11 +44,16 @@ function App() {
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<PasswordResetConfirm />} />
               <Route path="/transactions/receipt/:receipt_id" element={<ReceiptPage />} />
+              
+              {/* Student Portal Routes */}
+              <Route path="/student/login" element={<StudentLogin />} />
+              <Route path="/student/dashboard" element={<StudentDashboard />} />
 
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard/overview" element={<Overview />} />
                 <Route path="/dashboard/payment-items" element={<PaymentItems />} />
                 <Route path="/dashboard/transactions" element={<TransactionsPage />} />
+                <Route path="/dashboard/receipts" element={<ReceiptsPage />} />
                 <Route path="/create-association" element={<AssociationForm />} />
                 <Route path="/dashboard/students" element={<PayersPage />} />
                 <Route path="/settings" element={<SettingsPage />} />

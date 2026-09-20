@@ -80,8 +80,32 @@ export default function AdminProfileCard({ data, loading, onUpdated }) {
         await triggerContextRefresh();
         
       } else {
-        const error = await res.json();
-        setMessage({ type: 'error', text: error.message || 'Update failed' });
+        const errorData = await res.json();
+        let errorMsg = 'Update failed';
+        
+        if (errorData.message) {
+           errorMsg = errorData.message;
+           // If the backend returns the generic fallback message, try to extract the specific field error
+           if (errorMsg === "Please check your input and try again" && errorData.errors && Object.keys(errorData.errors).length > 0) {
+              const firstKey = Object.keys(errorData.errors)[0];
+              const formattedKey = firstKey.charAt(0).toUpperCase() + firstKey.slice(1).replace('_', ' ');
+              errorMsg = `${formattedKey}: ${errorData.errors[firstKey]}`;
+           }
+        } else if (errorData.detail) {
+           errorMsg = errorData.detail;
+        } else if (errorData.error) {
+           errorMsg = errorData.error;
+        } else if (typeof errorData === 'object' && Object.keys(errorData).length > 0) {
+           const firstKey = Object.keys(errorData)[0];
+           if (Array.isArray(errorData[firstKey])) {
+             const formattedKey = firstKey.charAt(0).toUpperCase() + firstKey.slice(1).replace('_', ' ');
+             errorMsg = `${formattedKey}: ${errorData[firstKey][0]}`;
+           } else if (typeof errorData[firstKey] === 'string') {
+             errorMsg = errorData[firstKey];
+           }
+        }
+        
+        setMessage({ type: 'error', text: errorMsg });
         setSaving(false);
       }
     } catch (error) {

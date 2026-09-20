@@ -207,18 +207,6 @@ export default function TransactionsPage() {
     // eslint-disable-next-line
   }, [page, search, status, type, currentSession?.id]);
 
-  // Poll for new transactions
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      // Only poll on the first page and without filters to keep it simple
-      if (page === 1 && !search && !status && !type) {
-        fetchTransactions(1, true); // true for background fetch
-      }
-    }, 5000); // Poll every 5 seconds. You can adjust this value.
-
-    return () => clearInterval(intervalId); // Cleanup when component unmounts or dependencies change
-  }, [page, search, status, type, currentSession?.id]);
-
   // Show loading while session is loading
   if (sessionLoading) {
     return (
@@ -258,9 +246,21 @@ export default function TransactionsPage() {
   return (
     <MainLayout>
       <div className="bg-[#0F111F] min-h-screen pt-16 sm:p-6 sm:pt-16">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white mb-1">Transactions</h1>
-          <p className="text-gray-400">A list of all transactions and payment proofs for {currentSession.title}</p>
+        <div className="mb-6 flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-white mb-1">Transactions</h1>
+            <p className="text-gray-400">A list of all transactions and payment proofs for {currentSession.title}</p>
+          </div>
+          <button 
+            onClick={() => fetchTransactions(page, false)}
+            className="flex items-center gap-2 bg-[#23263A] hover:bg-gray-700 text-white px-4 py-2 rounded transition-colors"
+            title="Refresh list manually"
+          >
+            <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
         </div>
 
         {/* Filters */}
@@ -277,9 +277,10 @@ export default function TransactionsPage() {
             onChange={e => setStatus(e.target.value)}
             className="bg-[#23263A] border border-[#23263A] text-white px-4 py-2 rounded"
           >
-            <option value="">All Status</option>
+            <option value="">All Status (Excluding Expired)</option>
             <option value="verified">Verified</option>
             <option value="unverified">Unverified</option>
+            <option value="expired">Expired</option>
           </select>
           <button 
             onClick={handleExport}

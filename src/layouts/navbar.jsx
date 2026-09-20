@@ -30,7 +30,8 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }) {
     if (!sessionLoading) {
       fetchUnreadCount();
       // Set up interval to check for new notifications every 30 seconds
-      const interval = setInterval(fetchUnreadCount, 30000);
+      // Poll every 20 minutes (20 * 60 * 1000)
+      const interval = setInterval(fetchUnreadCount, 1200000);
       return () => clearInterval(interval);
     }
   }, [sessionLoading]);

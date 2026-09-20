@@ -3,6 +3,7 @@ export default function PayersTable({
   payers, 
   loading, 
   onViewDetails,
+  onEditPayer,
   selectedPayers,
   setSelectedPayers,
   page = 1,
@@ -122,9 +123,15 @@ export default function PayersTable({
                     <td className="py-4 text-white">{payer.matric_number}</td>
                     <td className="py-4 pr-2 text-white">{payer.email}</td>
                     <td className="py-4 text-white">{payer.phone_number}</td>
-                    <td className="py-4">
+                    <td className="py-4 flex gap-3">
                       <button
-                        className="text-purple-600 hover:underline cursor-pointer font-semibold"
+                        className="text-blue-500 hover:underline cursor-pointer font-semibold text-sm"
+                        onClick={() => onEditPayer && onEditPayer(payer)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="text-purple-600 hover:underline cursor-pointer font-semibold text-sm"
                         onClick={() => onViewDetails(payer)}
                       >
                         View Details

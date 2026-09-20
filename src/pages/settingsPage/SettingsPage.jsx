@@ -4,6 +4,7 @@ import BankInfoCard from "./components/BankInfoCard";
 import AdminProfileCard from "./components/AdminProfileCard";
 import AssociationInfoCard from "./components/AssociationInfoCard";
 import SessionManagementCard from "./components/SessionManagementCard";
+import AdminManagementCard from "./components/AdminManagementCard";
 import { API_ENDPOINTS } from "../../apiConfig";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { fetchWithTimeout, handleFetchError } from "../../utils/fetchUtils";
@@ -41,9 +42,9 @@ export default function SettingsPage() {
           assocResponse.ok ? assocResponse.json() : null,
         ]);
 
-        setBankInfo(bankData.data);
-        setAdmin(adminData.data);
-        setAssociation(assocData.data);
+        setBankInfo(bankData?.data);
+        setAdmin(adminData?.data);
+        setAssociation(assocData?.data);
       } catch (error) {
         const errorInfo = handleFetchError(error);
         console.error('Failed to fetch settings data:', errorInfo.message);
@@ -75,6 +76,7 @@ export default function SettingsPage() {
             loading={loading}
             onUpdated={updated => setAdmin(updated)}
           />
+          <AdminManagementCard />
           <AssociationInfoCard
             data={association}
             loading={loading}

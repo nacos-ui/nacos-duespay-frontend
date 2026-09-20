@@ -3,7 +3,7 @@ import { API_ENDPOINTS } from '../apiConfig';
 import { fetchWithTimeout } from '../utils/fetchUtils';
 import {
   LayoutDashboard, Receipt, ArrowLeftRight, LogOut,
-  Settings, User, X
+  Settings, User, X, FileText
 } from 'lucide-react';
 
 export default function Sidebar({ onClose }) {
@@ -13,6 +13,7 @@ export default function Sidebar({ onClose }) {
     { label: 'Overview', icon: <LayoutDashboard className="w-5 h-5" />, to: '/dashboard/overview' },
     { label: 'Payment Items', icon: <Receipt className="w-5 h-5" />, to: '/dashboard/payment-items' },
     { label: 'Transactions', icon: <ArrowLeftRight className="w-5 h-5" />, to: '/dashboard/transactions' },
+    { label: 'Receipts', icon: <FileText className="w-5 h-5" />, to: '/dashboard/receipts' },
     { label: 'Students', icon: <User className="w-5 h-5" />, to: '/dashboard/students' },
   ];
 

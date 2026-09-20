@@ -39,6 +39,12 @@ export const API_ENDPOINTS = {
   GET_PAYERS: `${API_BASE_URL}/api/payers/`,
   GET_PAYER: (id) => `${API_BASE_URL}/api/payers/${id}/`,
   PAYER_CHECK: `${API_BASE_URL}/api/payers/check/`,
+  PAYER_LOOKUP: `${API_BASE_URL}/api/payers/lookup/`,
+  
+  // Student portal endpoints
+  STUDENT_REQUEST_OTP: `${API_BASE_URL}/api/payers/auth/request-otp/`,
+  STUDENT_VERIFY_OTP: `${API_BASE_URL}/api/payers/auth/verify-otp/`,
+  STUDENT_TRANSACTIONS: `${API_BASE_URL}/api/payers/me/transactions/`,
 
   // Payment items endpoints
   PAYMENT_ITEM_DETAILS: (id) => `${API_BASE_URL}/api/payments/payment-items/${id}/`,
@@ -53,6 +59,8 @@ export const API_ENDPOINTS = {
   // Admin profile endpoints
   GET_ADMIN_USER: `${API_BASE_URL}/api/main/adminuser/`,
   UPDATE_ADMIN_USER: (id) => `${API_BASE_URL}/api/main/adminuser/${id}/`,
+  ASSOCIATION_ADMINS: `${API_BASE_URL}/api/main/association-admins/`,
+  MANAGE_ASSOCIATION_ADMIN: (id) => `${API_BASE_URL}/api/main/association-admins/${id}/`,
 
   // Session endpoints
   GET_SESSIONS: `${API_BASE_URL}/api/association/sessions/`,

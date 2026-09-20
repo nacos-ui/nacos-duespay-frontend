@@ -76,9 +76,11 @@ export default function TransactionDetailsModal({ transaction, onClose, onStatus
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                   transaction.is_verified
                     ? "bg-green-800 text-green-300"
+                    : transaction.is_expired
+                    ? "bg-red-800 text-red-300"
                     : "bg-yellow-800 text-yellow-300"
                 }`}>
-                  {transaction.is_verified ? "Verified" : "Unverified"}
+                  {transaction.is_verified ? "Verified" : transaction.is_expired ? "Expired" : "Pending"}
                 </span>
               </div>
             </div>
@@ -95,9 +97,17 @@ export default function TransactionDetailsModal({ transaction, onClose, onStatus
                 {verifying
                   ? "Processing..."
                   : transaction.is_verified
-                  ? "Mark as Unverified"
+                  ? "Mark as Pending"
                   : "Mark as Verified"}
               </button>
+              {transaction.is_verified && transaction.receipt_id && (
+                <button
+                  className="px-6 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700"
+                  onClick={() => window.open(`/transactions/receipt/${transaction.receipt_id}`, '_blank')}
+                >
+                  View Receipt
+                </button>
+              )}
               <button
                 className="px-6 py-2 rounded bg-purple-600 text-white font-semibold hover:bg-purple-700"
                 onClick={onClose}

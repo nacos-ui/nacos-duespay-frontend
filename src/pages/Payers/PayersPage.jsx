@@ -3,6 +3,7 @@ import { Trash2, X } from "lucide-react";
 import MainLayout from "../../layouts/mainLayout";
 import PayersTable from "./components/PayersTable";
 import PayerDetailsModal from "./components/PayerDetailsModal"; 
+import EditPayerModal from "./components/EditPayerModal";
 import PayerTransactionsModal from "./components/PayerTransactionsModal";
 import TransactionDetailsModal from "../Transactions/components/TransactionDetailsModal";
 import Pagination from "../Transactions/components/Pagination";
@@ -42,8 +43,9 @@ export default function PayersPage() {
   // Modals
   const [selectedPayer, setSelectedPayer] = useState(null);
   const [showPayerDetails, setShowPayerDetails] = useState(false);
+  const [showEditPayer, setShowEditPayer] = useState(false);
   const [showPayerTransactions, setShowPayerTransactions] = useState(false);
-  const [selectedMatric, setSelectedMatric] = useState(null);
+  const [selectedPayerForTransactions, setSelectedPayerForTransactions] = useState(null);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   // Fetch association type (to conditionally show/hide faculty filter)
@@ -196,18 +198,6 @@ export default function PayersPage() {
     // eslint-disable-next-line
   }, [page, search, faculty, department, currentSession?.id]);
 
-  // Poll for new payers
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      // Only poll on the first page and without filters to keep it simple
-      if (page === 1 && !search && !faculty && !department) {
-        fetchPayers(1, true); // true for background fetch
-      }
-    }, 5000); // Poll every 5 seconds. You can adjust this value.
-
-    return () => clearInterval(intervalId); // Cleanup when component unmounts or dependencies change
-  }, [page, search, faculty, department, currentSession?.id]);
-
   // Show loading while session is loading
   if (sessionLoading) {
     return (
@@ -247,9 +237,21 @@ export default function PayersPage() {
   return (
     <MainLayout>
       <div className="bg-[#0F111F] min-h-screen sm:pt-16 pt-16 sm:p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white mb-1">Payers List</h1>
-          <p className="text-gray-400">A list of all students who have submitted payment proofs for {currentSession.title}</p>
+        <div className="mb-6 flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-white mb-1">Payers List</h1>
+            <p className="text-gray-400">A list of all students who have submitted payment proofs for {currentSession.title}</p>
+          </div>
+          <button 
+            onClick={() => fetchPayers(page, false)}
+            className="flex items-center gap-2 bg-[#23263A] hover:bg-gray-700 text-white px-4 py-2 rounded transition-colors"
+            title="Refresh list manually"
+          >
+            <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
         </div>
 
         {/* Filters */}
@@ -336,6 +338,10 @@ export default function PayersPage() {
             setSelectedPayer(payer);
             setShowPayerDetails(true);
           }}
+          onEditPayer={payer => {
+            setSelectedPayer(payer);
+            setShowEditPayer(true);
+          }}
           selectedPayers={selectedPayers}
           setSelectedPayers={setSelectedPayers}
           page={page}
@@ -348,22 +354,32 @@ export default function PayersPage() {
           setPage={setPage}
           pageSize={7}
         />
+
+        {showEditPayer && selectedPayer && (
+          <EditPayerModal
+            payer={selectedPayer}
+            onClose={() => setShowEditPayer(false)}
+            onPayerUpdated={() => {
+              setShowEditPayer(false);
+              fetchPayers(page); // refresh the data
+            }}
+          />
+        )}
         
         {showPayerDetails && selectedPayer && (
           <PayerDetailsModal
             payer={selectedPayer}
             onClose={() => setShowPayerDetails(false)}
             onViewTransactions={payer => {
-              setSelectedMatric(payer.matric_number);
+              setSelectedPayerForTransactions(payer);
               setShowPayerTransactions(true);
             }}
           />
         )}
         
-        {showPayerTransactions && selectedMatric && (
+        {showPayerTransactions && selectedPayerForTransactions && (
           <PayerTransactionsModal
-            matricNumber={selectedMatric}
-            sessionId={currentSession?.id}
+            payer={selectedPayerForTransactions}
             onClose={() => setShowPayerTransactions(false)}
             onViewTransaction={tx => setSelectedTransaction(tx)}
           />

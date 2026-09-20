@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { API_ENDPOINTS } from "../../../apiConfig";
 import { fetchWithTimeout, handleFetchError } from "../../../utils/fetchUtils";
 
-export default function PayerTransactionsModal({ matricNumber, onClose, onViewTransaction }) {
+export default function PayerTransactionsModal({ payer, onClose, onViewTransaction }) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,7 +12,7 @@ export default function PayerTransactionsModal({ matricNumber, onClose, onViewTr
       setLoading(true);
       try {
         const token = localStorage.getItem("access_token");
-        const res = await fetchWithTimeout(`${API_ENDPOINTS.GET_TRANSACTIONS}?search=${matricNumber}`, {
+        const res = await fetchWithTimeout(`${API_ENDPOINTS.GET_TRANSACTIONS}?payer_id=${payer.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         }, 20000); // 10 second timeout for fetching payer transactions
         
@@ -32,8 +32,8 @@ export default function PayerTransactionsModal({ matricNumber, onClose, onViewTr
         setLoading(false);
       }
     };
-    if (matricNumber) fetchTransactions();
-  }, [matricNumber]);
+    if (payer?.id) fetchTransactions();
+  }, [payer?.id]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f111fbe] backdrop-blur-lg">
@@ -44,7 +44,7 @@ export default function PayerTransactionsModal({ matricNumber, onClose, onViewTr
         >
           <X />
         </button>
-        <h2 className="text-xl font-bold text-white mb-4">Transactions for {matricNumber}</h2>
+        <h2 className="text-xl font-bold text-white mb-4">Transactions for {payer?.matric_number}</h2>
         <div className="overflow-x-auto hide-scrollbar">
           <table className="w-full min-w-[900px] text-left">
             <thead>

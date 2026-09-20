@@ -40,9 +40,11 @@ export default function RecentTransactions({ transactions = [], loading }) {
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       tx.is_verified
                         ? "bg-green-800 text-green-300"
+                        : tx.is_expired
+                        ? "bg-red-800 text-red-300"
                         : "bg-yellow-800 text-yellow-300"
                     }`}>
-                      {tx.is_verified ? "Verified" : "Unverified"}
+                      {tx.is_verified ? "Verified" : tx.is_expired ? "Expired" : "Pending"}
                     </span>
                   </td>
                   <td className="py-2 text-gray-300">

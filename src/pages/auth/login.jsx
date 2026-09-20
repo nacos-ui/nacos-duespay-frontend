@@ -51,11 +51,8 @@ const LoginForm = ({ onToggle, onForgotPassword }) => {
         await refreshData();
         setSuccess('Login successful!');
         setTimeout(() => {
-          if (data.is_first_login) {
-            navigate('/create-association');
-          } else {
-            navigate('/dashboard/overview');
-          }
+          // Redirect directly to dashboard (single-association system)
+          navigate('/dashboard/overview');
         }, 1500);
       } else {
         setError(responseData?.message || 'Google login failed.');
@@ -118,11 +115,8 @@ const LoginForm = ({ onToggle, onForgotPassword }) => {
           setSuccess('Login successful!');
           
           setTimeout(() => {
-            if (data.is_first_login) {
-              navigate('/create-association');
-            } else {
-              navigate('/dashboard/overview');
-            }
+            // Redirect directly to dashboard (single-association system)
+            navigate('/dashboard/overview');
           }, 1000);
         }, 200);
         

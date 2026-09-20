@@ -56,11 +56,8 @@ const SignupForm = ({ onToggle }) => {
 
         setSuccess(true);
         setTimeout(() => {
-          if (data.is_first_login) {
-            navigate('/create-association');
-          } else {
-            navigate('/dashboard/overview');
-          }
+          // Redirect directly to dashboard (single-association system)
+          navigate('/dashboard/overview');
         }, 1500);
       } else {
         setError(responseData?.message || 'Google signup failed.');

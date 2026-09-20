@@ -38,7 +38,16 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
     if (token && !isPublicRoute(config.url)) {
-      config.headers.Authorization = `Bearer ${token}`;
+      let hasAuth = false;
+      if (config.headers && typeof config.headers.has === 'function') {
+        hasAuth = config.headers.has('Authorization');
+      } else if (config.headers) {
+        hasAuth = Object.keys(config.headers).some(k => k.toLowerCase() === 'authorization');
+      }
+      
+      if (!hasAuth) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -60,6 +69,11 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       localStorage.removeItem('access_token');
+
+      // Only show admin logout modal on admin dashboard routes
+      if (!window.location.pathname.startsWith('/dashboard')) {
+        return Promise.reject(error);
+      }
 
       if (setModalErrorGlobal) {
         setModalErrorGlobal({

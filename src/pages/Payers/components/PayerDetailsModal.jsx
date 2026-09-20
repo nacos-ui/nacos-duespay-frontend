@@ -37,6 +37,10 @@ export default function PayerDetailsModal({ payer, onClose, onViewTransactions }
             <span className="text-gray-400 text-sm">Department</span>
             <div className="text-white">{payer.department}</div>
           </div>
+          <div>
+            <span className="text-gray-400 text-sm">Level</span>
+            <div className="text-white">{payer.level || "N/A"}</div>
+          </div>
         </div>
         <div className="flex justify-end mt-6">
           <button

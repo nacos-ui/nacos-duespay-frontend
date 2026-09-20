@@ -43,24 +43,48 @@ const DuesPayPaymentFlow = () => {
   const paymentReference = urlParams.get('reference');
   const paymentStatus = urlParams.get('status');
 
-  const [currentStep, setCurrentStep] = useState(paymentReference ? 4 : 1);
-  const [payerData, setPayerData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    level: '',
-    phoneNumber: '',
-    matricNumber: '',
-    faculty: '',
-    department: '',
+  const [currentStep, setCurrentStep] = useState(() => {
+    if (paymentReference) return 4;
+    const saved = localStorage.getItem('duespay_reg_step');
+    return saved ? parseInt(saved, 10) : 1;
+  });
+
+  const [payerData, setPayerData] = useState(() => {
+    const saved = localStorage.getItem('duespay_payer_data');
+    if (saved) return JSON.parse(saved);
+    return {
+      firstName: '',
+      lastName: '',
+      email: '',
+      level: '',
+      phoneNumber: '',
+      matricNumber: '',
+      faculty: '',
+      department: '',
+    };
   });
 
   const [associationData, setAssociationData] = useState(null);
   const [paymentItems, setPaymentItems] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(() => {
+    const saved = localStorage.getItem('duespay_selected_items');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  const [payerId, setPayerId] = useState(null);
-  const [referenceId, setReferenceId] = useState(paymentReference || null);
+  const [payerId, setPayerId] = useState(() => localStorage.getItem('duespay_payer_id') || null);
+  const [referenceId, setReferenceId] = useState(paymentReference || localStorage.getItem('duespay_reference_id') || null);
+
+  // Sync state to localStorage
+  useEffect(() => {
+    if (!paymentReference) {
+      localStorage.setItem('duespay_reg_step', currentStep.toString());
+      localStorage.setItem('duespay_payer_data', JSON.stringify(payerData));
+      localStorage.setItem('duespay_selected_items', JSON.stringify(selectedItems));
+      if (payerId) localStorage.setItem('duespay_payer_id', payerId);
+      if (referenceId) localStorage.setItem('duespay_reference_id', referenceId);
+    }
+  }, [currentStep, payerData, selectedItems, payerId, referenceId, paymentReference]);
+
 
   const [regError, setRegError] = useState("");
   const [regLoading, setRegLoading] = useState(false);
@@ -166,6 +190,14 @@ const DuesPayPaymentFlow = () => {
             clearInterval(pollingInterval);
             setPollingInterval(null);
           }
+          
+          // Clear localStorage on success to start fresh next time
+          localStorage.removeItem('duespay_reg_step');
+          localStorage.removeItem('duespay_payer_data');
+          localStorage.removeItem('duespay_selected_items');
+          localStorage.removeItem('duespay_payer_id');
+          localStorage.removeItem('duespay_reference_id');
+          
           setCurrentStep(4);
         }
       }
@@ -211,6 +243,14 @@ const DuesPayPaymentFlow = () => {
         if (res.ok) {
           const data = responseData.data;
           setPaymentStatusData(data);
+          
+          if (data.is_verified || data.status === 'verified' || data.payment_status === 'verified') {
+            localStorage.removeItem('duespay_reg_step');
+            localStorage.removeItem('duespay_payer_data');
+            localStorage.removeItem('duespay_selected_items');
+            localStorage.removeItem('duespay_payer_id');
+            localStorage.removeItem('duespay_reference_id');
+          }
         } else {
           throw new Error('Failed to fetch payment status');
         }
@@ -728,22 +768,25 @@ const DuesPayPaymentFlow = () => {
 
               {/* Content Card */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden min-h-[500px]">
-                <div className={`transition-all duration-300 ${currentStep === 4 ? "p-0 h-full" : "p-6 md:p-8"}`}>
+                <div className={`transition-all duration-300 ${currentStep === 4 ? "p-0 h-full" : "p-4 sm:p-6 md:p-8"}`}>
                   {currentStep === 1 && (
                     <div className="space-y-6">
                       <div className="border-b border-gray-100 pb-4 mb-4">
                         <h2 className="text-2xl font-bold text-gray-900">Student Information</h2>
                         <p className="text-gray-500">Please enter your details to verify your identity.</p>
                       </div>
-                      <RegistrationStep
-                        ref={registrationStepRef}
-                        payerData={payerData}
-                        handleInputChange={(f, v) => setPayerData(prev => ({ ...prev, [f]: v }))}
-                        error={regError}
-                        loading={regLoading}
-                        associationData={associationData}
-                        themeColor={themeColor}
-                      />
+                      <div className="animate-fade-in bg-white dark:bg-[#0F111F]">
+                        <RegistrationStep
+                          ref={registrationStepRef}
+                          payerData={payerData}
+                          handleInputChange={(f, v) => setPayerData(prev => ({ ...prev, [f]: v }))}
+                          handleMultipleInputChanges={(updates) => setPayerData(prev => ({ ...prev, ...updates }))}
+                          error={regError}
+                          loading={regLoading}
+                          associationData={associationData}
+                          themeColor={themeColor}
+                        />
+                      </div>
                     </div>
                   )}
 

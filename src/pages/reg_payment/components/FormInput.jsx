@@ -22,7 +22,8 @@ const FormInput = ({
   required = false,
   themeColor,
   error,
-  options = [] // Add options prop
+  options = [], // Add options prop
+  disabled = false
 }) => {
   const Icon = getIcon(label);
   
@@ -40,22 +41,23 @@ const FormInput = ({
           <select
             value={value}
             onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
             className={`w-full px-5 py-4 bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm border-2 rounded-xl focus:ring-4 focus:border-transparent transition-all duration-300 text-gray-900 dark:text-white outline-none ${
               error 
                 ? 'border-red-500 dark:border-red-400 focus:ring-red-500/20 shadow-lg shadow-red-500/20' 
                 : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'
-            }`}
+            } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
             style={{
               '--tw-ring-color': error ? '#ef444420' : `${themeColor}30`,
             }}
             onFocus={(e) => {
-              if (!error) {
+              if (!error && !disabled) {
                 e.target.style.borderColor = themeColor;
                 e.target.style.boxShadow = `0 0 0 4px ${themeColor}20`;
               }
             }}
             onBlur={(e) => {
-              if (!error) {
+              if (!error && !disabled) {
                 e.target.style.borderColor = '';
                 e.target.style.boxShadow = '';
               }
@@ -72,22 +74,23 @@ const FormInput = ({
             type={type}
             value={value}
             onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
             className={`w-full px-5 py-4 bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm border-2 rounded-xl focus:ring-4 focus:border-transparent transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 outline-none ${
               error 
                 ? 'border-red-500 dark:border-red-400 focus:ring-red-500/20 shadow-lg shadow-red-500/20' 
                 : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'
-            }`}
+            } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
             style={{
               '--tw-ring-color': error ? '#ef444420' : `${themeColor}30`,
             }}
             onFocus={(e) => {
-              if (!error) {
+              if (!error && !disabled) {
                 e.target.style.borderColor = themeColor;
                 e.target.style.boxShadow = `0 0 0 4px ${themeColor}20`;
               }
             }}
             onBlur={(e) => {
-              if (!error) {
+              if (!error && !disabled) {
                 e.target.style.borderColor = '';
                 e.target.style.boxShadow = '';
               }
