@@ -42,7 +42,13 @@ const TransactionModal = ({ transaction, onClose, onRefresh, themeColor, loading
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500 dark:text-gray-400">Date</span>
             <span className="font-medium text-gray-900 dark:text-white">
-              {new Date(transaction.submitted_at).toLocaleDateString()}
+              {new Date(transaction.submitted_at).toLocaleString([], {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
             </span>
           </div>
 
@@ -393,7 +399,13 @@ export default function StudentDashboard() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(txn.submitted_at).toLocaleDateString()}
+                        {new Date(txn.submitted_at).toLocaleString([], {
+                          year: 'numeric',
+                          month: 'numeric',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <ChevronRight className="w-5 h-5 text-gray-400 inline-block" />
