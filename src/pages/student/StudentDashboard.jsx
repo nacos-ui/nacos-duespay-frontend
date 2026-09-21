@@ -93,7 +93,7 @@ const TransactionModal = ({ transaction, onClose, onRefresh, themeColor, loading
               <FileText className="w-4 h-4" />
               View Receipt
             </button>
-          ) : !transaction.is_verified && !transaction.is_expired ? (
+          ) : !transaction.is_verified ? (
             <button
               onClick={() => onRefresh(transaction.reference_id)}
               disabled={loadingRef === transaction.reference_id}

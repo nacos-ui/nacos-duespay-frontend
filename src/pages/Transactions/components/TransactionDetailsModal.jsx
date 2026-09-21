@@ -5,6 +5,7 @@ import { fetchWithTimeout, handleFetchError } from "../../../utils/fetchUtils";
 
 export default function TransactionDetailsModal({ transaction, onClose, onStatusChange }) {
   const [verifying, setVerifying] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
   if (!transaction) return null;
@@ -33,6 +34,28 @@ export default function TransactionDetailsModal({ transaction, onClose, onStatus
       setError(errorInfo.message || "Could not update verification status.");
     } finally {
       setVerifying(false);
+    }
+  };
+
+  const handleRefreshStatus = async () => {
+    setRefreshing(true);
+    setError("");
+    try {
+      const res = await fetchWithTimeout(API_ENDPOINTS.PAYMENT_STATUS(transaction.reference_id));
+      const rawData = await res.json();
+      const data = rawData.data || rawData;
+      
+      if (data.is_verified || data.status === 'verified' || data.payment_status === 'verified') {
+        if (onStatusChange) onStatusChange();
+        if (onClose) onClose();
+      } else {
+        setError("Transaction is still pending on Ercaspay.");
+      }
+    } catch (err) {
+      const errorInfo = handleFetchError(err);
+      setError(errorInfo.message || "Status Check Failed");
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -106,6 +129,15 @@ export default function TransactionDetailsModal({ transaction, onClose, onStatus
                   onClick={() => window.open(`/transactions/receipt/${transaction.receipt_id}`, '_blank')}
                 >
                   View Receipt
+                </button>
+              )}
+              {!transaction.is_verified && (
+                <button
+                  className="px-6 py-2 rounded bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+                  onClick={handleRefreshStatus}
+                  disabled={refreshing}
+                >
+                  {refreshing ? "Refreshing..." : "Refresh Status"}
                 </button>
               )}
               <button
