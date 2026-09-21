@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx';
 import { API_ENDPOINTS } from '../apiConfig';
 import { fetchWithTimeout, handleFetchError } from './fetchUtils';
 
-export const exportTransactions = async (search, status, type, setExportLoading, sessionId, showErrorModal) => {
+export const exportTransactions = async (search, status, type, setExportLoading, sessionId, showErrorModal, totalCount = 10000) => {
   setExportLoading(true);
   try {
     const token = localStorage.getItem("access_token");
@@ -12,7 +12,7 @@ export const exportTransactions = async (search, status, type, setExportLoading,
       return;
     }
     
-    // 🔥 FIX: Fetch ALL transactions for export (remove pagination)
+    // Fetch ALL transactions for export (using exact count)
     const params = new URLSearchParams();
     params.append("session_id", sessionId);
     
@@ -20,8 +20,9 @@ export const exportTransactions = async (search, status, type, setExportLoading,
     if (status) params.append("status", status);
     if (type) params.append("type", type);
     
-    // 🔥 KEY FIX: Remove page parameter and set large page_size or use export endpoint
-    params.append("page_size", "10000"); // Get all records (adjust based on your backend limit)
+    // Pass the exact number of items to fetch, fallback to 10000 if not provided or 0
+    const pageSize = totalCount && totalCount > 0 ? totalCount.toString() : "10000";
+    params.append("page_size", pageSize);
     // OR remove pagination entirely if your backend supports it
     // params.append("export", "true"); // If your backend has a special export mode
 
@@ -116,7 +117,7 @@ export const exportTransactions = async (search, status, type, setExportLoading,
   }
 };
 
-export const exportPayers = async (search, faculty, department, setExportLoading, sessionId, showErrorModal) => {
+export const exportPayers = async (search, faculty, department, setExportLoading, sessionId, showErrorModal, totalCount = 10000) => {
   setExportLoading(true);
   try {
     const token = localStorage.getItem("access_token");
@@ -126,7 +127,7 @@ export const exportPayers = async (search, faculty, department, setExportLoading
       return;
     }
     
-    // 🔥 FIX: Fetch ALL payers for export (remove pagination)
+    // Fetch ALL payers for export (using exact count)
     const params = new URLSearchParams();
     params.append("session_id", sessionId);
     
@@ -134,8 +135,9 @@ export const exportPayers = async (search, faculty, department, setExportLoading
     if (faculty) params.append("faculty", faculty);
     if (department) params.append("department", department);
     
-    // 🔥 KEY FIX: Remove page parameter and set large page_size
-    params.append("page_size", "10000"); // Get all records
+    // Pass the exact number of items to fetch, fallback to 10000 if not provided or 0
+    const pageSize = totalCount && totalCount > 0 ? totalCount.toString() : "10000";
+    params.append("page_size", pageSize);
 
     const res = await fetchWithTimeout(`${API_ENDPOINTS.GET_PAYERS}?${params.toString()}`, {
       headers: {

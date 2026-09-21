@@ -163,7 +163,8 @@ export default function PayersPage() {
 
   // Handle export using utility function - now includes session
   const handleExport = () => {
-    exportPayers(search, faculty, department, setExportLoading, currentSession?.id);
+    // Pass null for showErrorModal since it's not defined here, then pass exact count
+    exportPayers(search, faculty, department, setExportLoading, currentSession?.id, null, count);
   };
 
   // Get bulk modal content

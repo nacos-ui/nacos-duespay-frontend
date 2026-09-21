@@ -165,7 +165,8 @@ export default function TransactionsPage() {
 
   // Handle export using utility function - now includes session
   const handleExport = () => {
-    exportTransactions(search, status, type, setExportLoading, currentSession?.id);
+    // Pass null for showErrorModal since it's not defined here, then pass exact count
+    exportTransactions(search, status, type, setExportLoading, currentSession?.id, null, count);
   };
 
   // Get bulk modal content
